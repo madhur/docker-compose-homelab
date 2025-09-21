@@ -9,6 +9,9 @@
 !**/docker-compose.yml
 !**/compose.yaml
 !**/traefik.yml
+!**/.env
+!**/redis.conf
+!**/docker-compose.env
 
 # Don't ignore .gitignore itself
 !.gitignore
