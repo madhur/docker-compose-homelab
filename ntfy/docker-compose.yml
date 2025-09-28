@@ -9,8 +9,8 @@ services:
     volumes:
       - /var/cache/ntfy:/var/cache/ntfy
       - /etc/ntfy:/etc/ntfy
-    ports:
-      - 8002:80
+    # ports:
+    #   - 8002:80
     restart: unless-stopped
     networks:
       - proxy-network
