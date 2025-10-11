@@ -1,0 +1,28 @@
+services:
+  dockpeek:
+    image: ghcr.io/dockpeek/dockpeek:latest
+    container_name: dockpeek
+    environment:
+      - SECRET_KEY=your_secure_secret_key # Required: Set a secure secret key
+      - USERNAME=admin # username
+      - PASSWORD=password # password
+      - DISABLE_AUTH=true
+    # ports:
+    #   - "3420:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.dockpeek.rule=Host(`dockpeek.desktop.madhur.co.in`)"
+        - "traefik.http.routers.dockpeek.entrypoints=web"
+        - "traefik.http.services.dockpeek.loadbalancer.server.port=8000"
+        - "traefik.docker.network=proxy-network"
+        - "traefik.http.routers.dockpeek.middlewares=vpn-whitelist"
+        - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

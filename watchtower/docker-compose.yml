@@ -8,6 +8,7 @@ services:
       - WATCHTOWER_MONITOR_ONLY=true
       - WATCHTOWER_NOTIFICATION_URL=ntfy://ntfy:80/systemd?title=WatchtowerUpdates&scheme=http
       - WATCHTOWER_SCHEDULE=0 0 23 * * *
+      - TZ=Asia/Kolkata
     networks:
       - proxy-network
     restart: unless-stopped
