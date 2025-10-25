@@ -1,0 +1,32 @@
+services:
+  beaverhabits:
+    container_name: beaverhabits
+    #user: 1000:1000 # User permissions of your docker or default user.
+    environment:
+      # See the link below to find all the environment variables
+      # https://github.com/daya0576/beaverhabits/wiki/Development#options
+      - HABITS_STORAGE=USER_DISK # DATABASE stores in a single SQLite database named habits.db. USER_DISK option saves in a local json file.
+      - TRUSTED_LOCAL_EMAIL=ahuja.madhur@gmail.com # Skip authentication
+      - INDEX_HABIT_DATE_COLUMNS=5 # Customize the date columns for the index page.
+      - ENABLE_IOS_STANDALONE=true
+    volumes:
+      - ./beaver/:/app/.user/ # Change directory to match your docker file scheme.
+    # ports:
+    #   - 8080:8080
+    restart: unless-stopped
+    image: daya0576/beaverhabits:latest
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.beaverhabits.rule=Host(`beaverhabits.desktop.madhur.co.in`)"
+      - "traefik.http.routers.beaverhabits.entrypoints=web"
+      - "traefik.http.services.beaverhabits.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.beaverhabits.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+
+
+networks:
+  proxy-network:
+    external: true
