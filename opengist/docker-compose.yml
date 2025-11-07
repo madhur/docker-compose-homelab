@@ -1,0 +1,24 @@
+services:
+  opengist:
+    image: ghcr.io/thomiceli/opengist:1.11
+    container_name: opengist
+    restart: unless-stopped
+    # ports:
+    #   - "6157:6157" # HTTP port
+    #   - "2222:2222" # SSH port, can be removed if you don't use SSH
+    volumes:
+      - "$HOME/.opengist:/opengist"
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.opengist.rule=Host(`og.desktop.madhur.co.in`)"
+      - "traefik.http.routers.opengist.entrypoints=web"
+      - "traefik.http.services.opengist.loadbalancer.server.port=6157"
+      - "traefik.docker.network=proxy-network"
+
+
+
+networks:
+  proxy-network:
+    external: true

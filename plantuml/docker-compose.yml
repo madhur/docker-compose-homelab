@@ -1,0 +1,18 @@
+services:
+
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    container_name: plantuml
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plantuml.rule=Host(`plantuml.desktop.madhur.co.in`)"
+      - "traefik.http.routers.plantuml.entrypoints=web"
+      - "traefik.http.services.plantuml.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

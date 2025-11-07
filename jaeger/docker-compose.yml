@@ -1,0 +1,37 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    # ports:
+    #   - "6831:6831/udp"
+    #   - "16686:16686"
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jaeger.rule=Host(`jaeger.desktop.madhur.co.in`)"
+      - "traefik.http.routers.jaeger.entrypoints=web"
+      - "traefik.http.services.jaeger.loadbalancer.server.port=16686"
+      - "traefik.docker.network=proxy-network"
+  hotrod:
+    image: jaegertracing/example-hotrod:latest
+    # ports: 
+    #   - "8080:8080"
+    command: ["all"]
+    environment:
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+    networks:
+      - proxy-network
+    depends_on:
+      - jaeger
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hotrod.rule=Host(`hotrod.desktop.madhur.co.in`)"
+      - "traefik.http.routers.hotrod.entrypoints=web"
+      - "traefik.http.services.hotrod.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy-network"
+
+
+networks:
+  proxy-network:
+    external: true
