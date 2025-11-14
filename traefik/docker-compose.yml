@@ -12,8 +12,8 @@ services:
     ports:
       - 80:80 # HTTP entryPoints
       - 443:443 # HTTPS entryPoints
-      - 8081:8080 # Dashbaord WebGui 
-      - "8082:8082" #metrics
+      - 9091:8080 # Dashbaord WebGui 
+      - "9096:8082" #metrics
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik.yml:/traefik.yml:ro

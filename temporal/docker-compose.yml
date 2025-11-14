@@ -1,6 +1,7 @@
 services:
   postgresql:
     container_name: temporal-postgresql
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: temporal
       POSTGRES_USER: temporal
@@ -10,9 +11,11 @@ services:
     # ports:
     #   - 5432:5432
     volumes:
-      - /var/lib/postgresql/data
+      - temporal-postgresql-data:/var/lib/postgresql/data  # Named volume
+
   temporal:
     container_name: temporal
+    restart: unless-stopped
     depends_on:
       - postgresql
     environment:
@@ -40,8 +43,10 @@ services:
       - 7233:7233
     volumes:
       - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+
   temporal-admin-tools:
     container_name: temporal-admin-tools
+    restart: unless-stopped
     depends_on:
       - temporal
     environment:
@@ -52,13 +57,16 @@ services:
       - proxy-network
     stdin_open: true
     tty: true
+
   temporal-ui:
     container_name: temporal-ui
+    restart: unless-stopped
     depends_on:
       - temporal
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      - TEMPORAL_CORS_ORIGINS=http://temporal-ui.desktop.madhur.co.in
+      - TEMPORAL_CSRF_COOKIE_INSECURE=true
     image: temporalio/ui:${TEMPORAL_UI_VERSION}
     networks:
       - proxy-network
@@ -75,7 +83,9 @@ services:
     # ports:
     #   - 8080:8080
 
-
+# Add this at the bottom
+volumes:
+  temporal-postgresql-data:
 
 networks:
   proxy-network:

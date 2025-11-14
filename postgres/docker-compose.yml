@@ -1,0 +1,12 @@
+services:
+  db:
+    image: 'postgres:13' # Specifies the PostgreSQL 13 image
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres # Replace with your desired username
+      POSTGRES_PASSWORD: password # Replace with your desired password
+      POSTGRES_DB: eden # Replace with your desired database name
+    ports:
+      - "5432:5432" # Maps host port 5432 to container port 5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data # Persists data to a local directory
