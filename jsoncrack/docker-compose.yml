@@ -1,0 +1,19 @@
+
+services:
+  app:
+    build: /home/madhur/gitpersonal/jsoncrack.com
+    # ports:
+    #   - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jc.rule=Host(`jc.desktop.madhur.co.in`)"
+      - "traefik.http.routers.jc.entrypoints=web"
+      - "traefik.http.services.jc.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true
