@@ -1,0 +1,48 @@
+services:
+
+  db:
+    image: postgres:15-alpine
+    container_name: wikijs_db
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_PASSWORD: wikijsrocks
+      POSTGRES_USER: wikijs
+    logging:
+      driver: none
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - proxy-network
+
+  wiki:
+    image: ghcr.io/requarks/wiki:2
+    container_name: wikijs
+    depends_on:
+      - db
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: wikijs_db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: wikijsrocks
+      DB_NAME: wiki
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wiki.rule=Host(`wiki.desktop.madhur.co.in`)"
+      - "traefik.http.routers.wiki.entrypoints=web"
+      - "traefik.http.services.wiki.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+    # ports:
+    #   - "80:3000"
+
+volumes:
+  db-data:
+
+
+networks:
+  proxy-network:
+    external: true

@@ -1,0 +1,20 @@
+services:
+  otterwiki:
+    image: redimp/otterwiki:2
+    restart: unless-stopped
+    # ports:
+    #   - 8080:80
+    volumes:
+      - ./app-data:/app-data
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.otterwiki.rule=Host(`otterwiki.desktop.madhur.co.in`)"
+        - "traefik.http.routers.otterwiki.entrypoints=web"
+        - "traefik.http.services.otterwiki.loadbalancer.server.port=8080"
+        - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

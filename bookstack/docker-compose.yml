@@ -1,0 +1,51 @@
+services:
+  bookstack:
+    image: lscr.io/linuxserver/bookstack
+    container_name: bookstack
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - APP_URL=http://bookstack.desktop.madhur.co.in
+      - APP_KEY=base64:3qjlIoUX4Tw6fUQgZcxMbz6lb8+dAzqpvItqHvahW1c=
+      - DB_HOST=bookstack_db
+      - DB_PORT=3306
+      - DB_USERNAME=bookstack
+      - DB_PASSWORD=supersecretpassword
+      - DB_DATABASE=bookstackapp
+    volumes:
+      - ./bookstack_app_data:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bookstack.rule=Host(`bookstack.desktop.madhur.co.in`)"
+      - "traefik.http.routers.bookstack.entrypoints=web"
+      - "traefik.http.services.bookstack.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+    # ports:
+    #   - 6875:80
+    restart: unless-stopped
+    depends_on:
+      - bookstack_db
+
+
+  bookstack_db:
+    image: lscr.io/linuxserver/mariadb
+    container_name: bookstack_db
+    networks:
+      - proxy-network
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD=supersecretpassword
+      - TZ=Europe/London
+      - MYSQL_DATABASE=bookstackapp
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD=supersecretpassword
+    volumes:
+      - ./bookstack_db_data:/config
+    restart: unless-stopped
+
+networks:
+  proxy-network:
+    external: true

@@ -1,0 +1,27 @@
+services:
+  gollum:
+    image: gollumwiki/gollum:6
+    restart: always
+    container_name: gollum
+    # ports:
+    #   - "4567:4567/tcp" # change the first port number to expose Gollum on a different port on the host
+    volumes:
+      # - ${PWD}/config.rb:/etc/gollum/config.rb # if using config.rb in your current directory
+      - ${PWD}/wikidata:/wiki # with your repository in the 'wiki' subdirectory of your current directory
+    command:
+      # - "--config=/etc/gollum/config.rb" # if using config.rb
+      - "--math"
+      # - ... # your additional options here
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.gollum.rule=Host(`gollum.desktop.madhur.co.in`)"
+        - "traefik.http.routers.gollum.entrypoints=web"
+        - "traefik.http.services.gollum.loadbalancer.server.port=4567"
+        - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+
+
+networks:
+  proxy-network:
+    external: true
