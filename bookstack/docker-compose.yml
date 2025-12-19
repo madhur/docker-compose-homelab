@@ -38,13 +38,15 @@ services:
       - PUID=1000
       - PGID=1000
       - MYSQL_ROOT_PASSWORD=supersecretpassword
-      - TZ=Europe/London
+      - TZ=Asia/Kolkata
       - MYSQL_DATABASE=bookstackapp
       - MYSQL_USER=bookstack
       - MYSQL_PASSWORD=supersecretpassword
     volumes:
       - ./bookstack_db_data:/config
     restart: unless-stopped
+    ports:
+      - 3307:3306
 
 networks:
   proxy-network:

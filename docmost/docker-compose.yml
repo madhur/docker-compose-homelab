@@ -8,8 +8,8 @@ services:
     environment:
       APP_URL: "http://localhost:3000"
       APP_SECRET: "1bd8750a-e6b5-4a1a-b8e9-937ead22fd22"
-      DATABASE_URL: "postgresql://docmost:STRONG_DB_PASSWORD@db:5432/docmost?schema=public"
-      REDIS_URL: "redis://redis:6379"
+      DATABASE_URL: "postgresql://docmost:STRONG_DB_PASSWORD@docmost_db:5432/docmost?schema=public"
+      REDIS_URL: "redis://local.madhur.co.in:6379"
     # ports:
     #   - "3000:3000"
     restart: unless-stopped
