@@ -19,8 +19,9 @@ services:
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.codeserver.rule=Host(`code.desktop.madhur.co.in`)"
-        - "traefik.http.routers.codeserver.entrypoints=web"
+        - "traefik.http.routers.codeserver.entrypoints=websecure"
         - "traefik.http.services.codeserver.loadbalancer.server.port=8080"
+        - "traefik.http.routers.codeserver.tls.certresolver=letencrypt"
         - "traefik.docker.network=proxy-network"
         - "traefik.http.routers.codeserver.middlewares=vpn-whitelist"
         - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"

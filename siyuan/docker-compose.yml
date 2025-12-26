@@ -1,0 +1,29 @@
+services:
+  main:
+    image: b3log/siyuan
+    container_name: siyuan
+    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
+    # ports:
+    #   - 6806:6806
+    volumes:
+      - ./workspace:/siyuan/workspace
+    restart: unless-stopped
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.siyuan.rule=Host(`siyuan.desktop.madhur.co.in`)"
+        - "traefik.http.routers.siyuan.entrypoints=websecure"
+        - "traefik.http.services.siyuan.loadbalancer.server.port=6806"
+        - "traefik.http.routers.siyuan.tls.certresolver=letencrypt"
+        - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+    environment:
+      # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      - TZ=Asia/Kolkata  # Customize time zone
+      # - PUID=${YOUR_USER_PUID}  # Customize user ID
+      # - PGID=${YOUR_USER_PGID}  # Customize group ID
+
+
+networks:
+  proxy-network:
+    external: true

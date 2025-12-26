@@ -5,7 +5,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - APP_URL=http://bookstack.desktop.madhur.co.in
+      - APP_URL=https://bookstack.desktop.madhur.co.in
       - APP_KEY=base64:3qjlIoUX4Tw6fUQgZcxMbz6lb8+dAzqpvItqHvahW1c=
       - DB_HOST=bookstack_db
       - DB_PORT=3306
@@ -17,13 +17,14 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.bookstack.rule=Host(`bookstack.desktop.madhur.co.in`)"
-      - "traefik.http.routers.bookstack.entrypoints=web"
+      - "traefik.http.routers.bookstack.entrypoints=websecure"
       - "traefik.http.services.bookstack.loadbalancer.server.port=80"
+      - "traefik.http.routers.bookstack.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
     networks:
       - proxy-network
-    # ports:
-    #   - 6875:80
+    ports:
+      - 6875:80
     restart: unless-stopped
     depends_on:
       - bookstack_db

@@ -14,8 +14,9 @@ services:
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.changedetection.rule=Host(`cd.desktop.madhur.co.in`)"
-        - "traefik.http.routers.changedetection.entrypoints=web"
+        - "traefik.http.routers.changedetection.entrypoints=websecure"
         - "traefik.http.services.changedetection.loadbalancer.server.port=5000"
+        - "traefik.http.routers.changedetection.tls.certresolver=letencrypt"
         - "traefik.docker.network=proxy-network"
         - "traefik.http.routers.changedetection.middlewares=vpn-whitelist"
         - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"

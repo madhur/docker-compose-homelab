@@ -27,7 +27,6 @@ services:
     # ports:
     #   - '2283:2283'
     depends_on:
-      - redis
       - database
     restart: unless-stopped
     healthcheck:
@@ -60,14 +59,14 @@ services:
     networks:
       - proxy-network
 
-  redis:
-    container_name: immich_redis
-    image: docker.io/valkey/valkey:8-bookworm@sha256:a137a2b60aca1a75130022d6bb96af423fefae4eb55faf395732db3544803280
-    healthcheck:
-      test: redis-cli ping || exit 1
-    restart: unless-stopped
-    networks:
-      - proxy-network
+  # redis:
+  #   container_name: immich_redis
+  #   image: docker.io/valkey/valkey:8-bookworm@sha256:a137a2b60aca1a75130022d6bb96af423fefae4eb55faf395732db3544803280
+  #   healthcheck:
+  #     test: redis-cli ping || exit 1
+  #   restart: unless-stopped
+  #   networks:
+  #     - proxy-network
 
   database:
     container_name: immich_postgres

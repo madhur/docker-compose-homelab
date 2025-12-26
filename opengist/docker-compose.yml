@@ -13,8 +13,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.opengist.rule=Host(`og.desktop.madhur.co.in`)"
-      - "traefik.http.routers.opengist.entrypoints=web"
+      - "traefik.http.routers.opengist.entrypoints=websecure"
       - "traefik.http.services.opengist.loadbalancer.server.port=6157"
+      - "traefik.http.routers.opengist.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
 
 

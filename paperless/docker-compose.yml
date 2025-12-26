@@ -29,13 +29,13 @@
 # For more extensive installation and update instructions, refer to the
 # documentation.
 services:
-  broker:
-    image: docker.io/library/redis:8
-    restart: unless-stopped
-    volumes:
-      - redisdata:/data
-    networks:
-      - proxy-network
+  # broker:
+  #   image: docker.io/library/redis:8
+  #   restart: unless-stopped
+  #   volumes:
+  #     - redisdata:/data
+  #   networks:
+  #     - proxy-network
   db:
     image: docker.io/library/postgres:17
     restart: unless-stopped
@@ -52,7 +52,6 @@ services:
     restart: unless-stopped
     depends_on:
       - db
-      - broker
       - gotenberg
       - tika
     # ports:
@@ -75,7 +74,7 @@ services:
     networks:
       - proxy-network
     environment:
-      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_REDIS: redis://local.madhur.co.in:6379
       PAPERLESS_DBHOST: db
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
@@ -102,7 +101,7 @@ volumes:
   data:
   media:
   pgdata:
-  redisdata:
+  # redisdata:
 
 
 

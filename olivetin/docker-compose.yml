@@ -1,0 +1,22 @@
+services:
+  olivetin:
+    image: jamesread/olivetin
+    container_name: olivetin
+    volumes:
+      - ./OliveTin-config:/config # replace host path or volume as needed
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.olivetin.rule=Host(`olivetin.desktop.madhur.co.in`)"
+      - "traefik.http.routers.olivetin.entrypoints=websecure"
+      - "traefik.http.services.olivetin.loadbalancer.server.port=1337"
+      - "traefik.http.routers.olivetin.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true
+
+
