@@ -1,0 +1,26 @@
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./config:/config
+      - /data/media:/media  # Adjust this path to where your media is stored
+      - ./cache:/cache
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jellyfin.rule=Host(`jf.desktop.madhur.co.in`)"
+      - "traefik.http.routers.jellyfin.entrypoints=websecure"
+      - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+      - "traefik.http.routers.jellyfin.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

@@ -1,0 +1,18 @@
+services:
+  it-tools:
+    image: ghcr.io/sharevb/it-tools:latest
+    container_name: it-tools
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.it-tools.rule=Host(`tools.desktop.madhur.co.in`)"
+      - "traefik.http.routers.it-tools.entrypoints=websecure"
+      - "traefik.http.services.it-tools.loadbalancer.server.port=8080"
+      - "traefik.http.routers.it-tools.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

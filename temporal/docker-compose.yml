@@ -65,16 +65,17 @@ services:
       - temporal
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CORS_ORIGINS=http://temporal-ui.desktop.madhur.co.in
-      - TEMPORAL_CSRF_COOKIE_INSECURE=true
+      - TEMPORAL_CORS_ORIGINS=https://temporal-ui.desktop.madhur.co.in
+      - TEMPORAL_CSRF_COOKIE_INSECURE=false
     image: temporalio/ui:${TEMPORAL_UI_VERSION}
     networks:
       - proxy-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.temporal-ui.rule=Host(`temporal-ui.desktop.madhur.co.in`)"
-      - "traefik.http.routers.temporal-ui.entrypoints=web"
+      - "traefik.http.routers.temporal-ui.entrypoints=websecure"
       - "traefik.http.services.temporal-ui.loadbalancer.server.port=8080"
+      - "traefik.http.routers.temporal-ui.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
       - "traefik.http.routers.temporal-ui.middlewares=vpn-whitelist"
       - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"

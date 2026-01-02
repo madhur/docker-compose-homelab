@@ -1,0 +1,31 @@
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - VERSION=docker
+      - ALLOWED_NETWORKS=192.168.0.0/16,172.16.0.0/12,10.0.0.0/8
+      # - PLEX_CLAIM= #optional - add your claim token from https://www.plex.tv/claim/
+    volumes:
+      - ./config:/config
+      - /data/media:/media  # Adjust this path to where your media is stored
+      - ./transcode:/transcode
+    ports:
+      - "32400:32400"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.rule=Host(`plex.desktop.madhur.co.in`)"
+      - "traefik.http.routers.plex.entrypoints=websecure"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
+      - "traefik.http.routers.plex.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true
