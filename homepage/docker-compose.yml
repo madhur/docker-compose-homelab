@@ -1,0 +1,27 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homepage.rule=Host(`home.desktop.madhur.co.in`)"
+      - "traefik.http.routers.homepage.entrypoints=websecure"
+      - "traefik.http.services.homepage.loadbalancer.server.port=3000"
+      - "traefik.http.routers.homepage.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.homepage.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+
+networks:
+  proxy-network:
+    external: true

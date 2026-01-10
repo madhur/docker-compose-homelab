@@ -1,0 +1,47 @@
+services:
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: linkwarden_postgres
+  #   env_file: .env
+  #   restart: always
+  #   volumes:
+  #     - ./pgdata:/var/lib/postgresql/data
+
+  linkwarden:
+    env_file: .env
+    container_name: linkwarden_app
+    restart: unless-stopped
+    # build: . # uncomment to build from source
+    image: ghcr.io/linkwarden/linkwarden:latest # comment to build from source
+    # ports:
+    #   - 3000:3000
+    volumes:
+      - ./data:/data/data
+    depends_on:
+      - meilisearch
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.linkwarden.rule=Host(`linkwarden.desktop.madhur.co.in`)"
+      - "traefik.http.routers.linkwarden.entrypoints=websecure"
+      - "traefik.http.services.linkwarden.loadbalancer.server.port=3000"
+      - "traefik.http.routers.linkwarden.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.linkwarden.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+
+  meilisearch:
+    container_name: linkwarden_meilisearch
+    image: getmeili/meilisearch:v1.12.8
+    restart:  unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./meili_data:/meili_data
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

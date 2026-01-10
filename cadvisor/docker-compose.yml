@@ -16,14 +16,6 @@ services:
     restart: unless-stopped
     networks:
       - proxy-network
-    labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.desktop.madhur.co.in`)"
-        - "traefik.http.routers.cadvisor.entrypoints=web"
-        - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
-        - "traefik.docker.network=proxy-network"
-        - "traefik.http.routers.cadvisor.middlewares=vpn-whitelist"
-        - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 
 networks:

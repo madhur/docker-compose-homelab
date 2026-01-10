@@ -19,6 +19,8 @@ services:
       - "traefik.http.routers.owntracks.entrypoints=web"
       - "traefik.http.services.owntracks.loadbalancer.server.port=8083"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.owntracks.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 
   owntracks-frontend:
@@ -39,6 +41,7 @@ services:
       - "traefik.http.routers.owntracks-web.entrypoints=web"
       - "traefik.http.services.owntracks-web.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.owntracks-web.middlewares=vpn-whitelist"
 
   mosquitto:
     image: eclipse-mosquitto

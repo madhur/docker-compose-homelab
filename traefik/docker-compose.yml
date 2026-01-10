@@ -7,6 +7,8 @@ services:
       - no-new-privileges:true
     environment:
       - TZ=Asia/Kolkata
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - proxy-network
     ports:
@@ -19,6 +21,7 @@ services:
       - ./traefik.yml:/traefik.yml:ro
       - traefik:/certs
       - ./letsencrypt:/letsencrypt  # Add this line
+      - ./dynamic:/dynamic:ro  # Dynamic config for local services
 
 volumes:
   traefik:

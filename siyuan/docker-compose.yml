@@ -15,6 +15,8 @@ services:
         - "traefik.http.services.siyuan.loadbalancer.server.port=6806"
         - "traefik.http.routers.siyuan.tls.certresolver=letencrypt"
         - "traefik.docker.network=proxy-network"
+        - "traefik.http.routers.siyuan.middlewares=vpn-whitelist"
+        - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
     networks:
       - proxy-network
     environment:

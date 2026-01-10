@@ -14,6 +14,8 @@ services:
       - "traefik.http.services.olivetin.loadbalancer.server.port=1337"
       - "traefik.http.routers.olivetin.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.olivetin.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 networks:
   proxy-network:

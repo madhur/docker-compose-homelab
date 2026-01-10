@@ -14,6 +14,8 @@ services:
       - "traefik.http.services.mytracks-web.loadbalancer.server.port=80"
       - "traefik.http.routers.mytracks-web.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.mytracks-web.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 
   location-sharing-backend:
@@ -37,6 +39,7 @@ services:
       - "traefik.http.services.mytracks.loadbalancer.server.port=8083"
       - "traefik.http.routers.mytracks.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.mytracks.middlewares=vpn-whitelist"
 
   redis:
     image: redis:8.2.1-alpine

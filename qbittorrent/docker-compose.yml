@@ -20,6 +20,8 @@ services:
       - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
       - "traefik.http.routers.qbittorrent.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.qbittorrent.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 networks:
   proxy-network:
