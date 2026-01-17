@@ -4,11 +4,13 @@ volumes:
 services:
   wg-easy:
     environment:
-      - INSECURE=true 
-    image: ghcr.io/wg-easy/wg-easy:15
+      - INSECURE=true
+      - INIT_ENABLED=true
+      - INIT_USERNAME=admin
+      - INIT_PASSWORD=adminadminadmin 
+    image: ghcr.io/wg-easy/wg-easy:15.2.1
     container_name: wg-easy
     networks:
-      proxy-network: {}  # For Traefik access
       wg:  # For VPN network with static IPs
         ipv4_address: 10.42.42.42
         ipv6_address: fdcc:ad94:bacf:61a3::2a
@@ -17,7 +19,7 @@ services:
       - /lib/modules:/lib/modules:ro
     ports:
       - "51820:51820/udp"
-      #- "51821:51821/tcp"
+      - "51821:51821/tcp"
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -29,16 +31,6 @@ services:
       - net.ipv6.conf.all.disable_ipv6=0
       - net.ipv6.conf.all.forwarding=1
       - net.ipv6.conf.default.forwarding=1
-    labels:
-      # These labels route HTTPS traffic to the wg-easy WEB INTERFACE (port 51821)
-      - "traefik.enable=true"
-      - "traefik.http.routers.wg-easy.rule=Host(`wg.desktop.madhur.co.in`)"
-      - "traefik.http.routers.wg-easy.entrypoints=websecure"
-      - "traefik.http.routers.wg-easy.tls.certresolver=letencrypt"
-      - "traefik.http.services.wg-easy.loadbalancer.server.port=51821"
-      - "traefik.docker.network=proxy-network"
-
-
 networks:
   wg:
     name: wg 
@@ -49,7 +41,3 @@ networks:
       config:
         - subnet: 10.42.42.0/24
         - subnet: fdcc:ad94:bacf:61a3::/64
-
-
-  proxy-network:
-    external: true
