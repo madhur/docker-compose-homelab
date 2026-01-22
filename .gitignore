@@ -5,13 +5,27 @@
 !*/
 
 !README.md
-# Allow docker-compose.yml files recursively
+
+# Allow config files
 !**/docker-compose.yml
 !**/compose.yaml
 !**/traefik.yml
-!**/.env
 !**/redis.conf
 !**/docker-compose.env
 
 # Don't ignore .gitignore itself
 !.gitignore
+
+# Ignore secret files (these take precedence over directory allows)
+.env
+**/.env
+
+# Ignore volume/data directories
+**/data/
+**/*data*/
+**/volume*/
+**/pgdata/
+**/config/
+**/storage/
+**/logs/
+**/cache/
