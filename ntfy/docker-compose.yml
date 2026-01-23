@@ -7,8 +7,9 @@ services:
     environment:
       - TZ=Asia/Kolkata    # optional: set desired timezone
     volumes:
-      - /var/cache/ntfy:/var/cache/ntfy
-      - /etc/ntfy:/etc/ntfy
+      - ./cache:/var/cache/ntfy
+      - ./server.yml:/etc/ntfy/server.yml
+      - ./firebase-key.json:/etc/ntfy/firebase-key.json:ro
     # ports:
     #   - 8002:80
     restart: unless-stopped
@@ -21,8 +22,8 @@ services:
       - "traefik.http.services.ntfy.loadbalancer.server.port=80"
       - "traefik.http.routers.ntfy.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.ntfy.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      # - "traefik.http.routers.ntfy.middlewares=vpn-whitelist"
+      # - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
 
 
 networks:
