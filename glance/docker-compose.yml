@@ -1,0 +1,22 @@
+services:
+  glance:
+    image: glanceapp/glance:latest
+    container_name: glance
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.glance.rule=Host(`glance.desktop.madhur.co.in`)"
+      - "traefik.http.routers.glance.entrypoints=websecure"
+      - "traefik.http.services.glance.loadbalancer.server.port=8080"
+      - "traefik.http.routers.glance.tls.certresolver=letencrypt"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

@@ -8,9 +8,18 @@ services:
       - TZ=Asia/Kolkata
     volumes:
       - ./config:/config
-      - /data/media:/media  # Adjust this path to where your media is stored
-      - ./cache:/cache
+      - /data/downloads:/media  # Adjust this path to where your media is stored
+      - /home/madhur/Videos:/media4  # Adjust this path to where your media is stored
+      - /home/madhur/Screenshots/Timeline:/media2  # Adjust this path to where your media is stored
+      - /data/be_discussions:/media3  # Adjust this path to where your media is stored      - ./cache:/cache
     restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu, compute, video]
     networks:
       - proxy-network
     labels:

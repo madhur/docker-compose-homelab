@@ -13,15 +13,26 @@ services:
     restart: unless-stopped
     networks:
       - proxy-network
+
+  qui:
+    image: ghcr.io/autobrr/qui:latest
+    container_name: qui
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./qui:/config
+      - /data/downloads:/downloads
+    restart: unless-stopped
+    networks:
+      - proxy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.qbittorrent.rule=Host(`torrent.desktop.madhur.co.in`)"
-      - "traefik.http.routers.qbittorrent.entrypoints=websecure"
-      - "traefik.http.services.qbittorrent.loadbalancer.server.port=8080"
-      - "traefik.http.routers.qbittorrent.tls.certresolver=letencrypt"
+      - "traefik.http.routers.qui.rule=Host(`torrent.desktop.madhur.co.in`)"
+      - "traefik.http.routers.qui.entrypoints=websecure"
+      - "traefik.http.services.qui.loadbalancer.server.port=7476"
+      - "traefik.http.routers.qui.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.qbittorrent.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.qui.middlewares=vpn-whitelist"
 
 networks:
   proxy-network:
