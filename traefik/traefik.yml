@@ -9,6 +9,10 @@ entryPoints:
     address: ":80"
   websecure:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        readTimeout: 600s
+        writeTimeout: 600s
   metrics:
     address: ":8082"
 serversTransport:

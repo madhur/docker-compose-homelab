@@ -1,0 +1,13 @@
+services:
+  gg-bot-uploader:
+    image: noobmaster669/gg-bot-uploader
+    container_name: gg-bot-uploader
+    stdin_open: true
+    tty: true
+    env_file:
+      - config.env
+    volumes:
+      - /mnt/local/media:/data
+      - /data/downloads:/downloads
+      - ./temp_upload:/app/temp_upload
+      - ./custom_description_templates:/app/description_templates/custom
