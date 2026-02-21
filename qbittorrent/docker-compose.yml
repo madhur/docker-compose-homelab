@@ -7,15 +7,15 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
     environment:
-      - VPN_SERVICE_PROVIDER=protonvpn
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Netherlands}
-      - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
-      - VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -4 -qO- --post-data="json={\"listen_port\":{{.Port}}}" "http://localhost:8080/api/v2/app/setPreferences" 2>/dev/null'
-      - TZ=Asia/Kolkata
+      VPN_SERVICE_PROVIDER: protonvpn
+      VPN_TYPE: wireguard
+      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
+      SERVER_COUNTRIES: ${SERVER_COUNTRIES:-Netherlands}
+      VPN_PORT_FORWARDING: "on"
+      VPN_PORT_FORWARDING_PROVIDER: protonvpn
+      VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
+      VPN_PORT_FORWARDING_UP_COMMAND: '/bin/sh -c ''wget -4 -qO- --post-data="json={\"listen_port\":{{.Port}}}" "http://localhost:8080/api/v2/app/setPreferences" 2>/dev/null || true'''
+      TZ: Asia/Kolkata
     volumes:
       - ./gluetun:/gluetun
     ports:
@@ -41,6 +41,8 @@ services:
     volumes:
       - ./config:/config
       - /data/downloads:/downloads
+      - ./gluetun:/gluetun:ro
+      - ./custom-cont-init.d:/custom-cont-init.d:ro
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
@@ -66,27 +68,6 @@ services:
       - "traefik.http.routers.qui.tls.certresolver=letencrypt"
       - "traefik.docker.network=proxy-network"
       - "traefik.http.routers.qui.middlewares=vpn-whitelist"
-
-  gluetun-qbittorrent-port-manager:
-    image: patrickaclark/gluetun-qbittorrent-port-manager:latest
-    restart: unless-stopped
-    container_name: gt-port-manager
-    network_mode: "service:gluetun"
-    environment:
-      - QBITTORRENT_SERVER=localhost  # IP Address of qbittorrent
-      - QBITTORRENT_PORT=8080
-      - PORT_FORWARDED=/tmp/gluetun/forwarded_port
-      - HTTP_S=http  # Select 'http' or 'https' depending on if you use certificates.
-      - GLUETUN_HOST=localhost  # IP or FQDN of gluetun control server
-      - GLUETUN_PORT=8000  # port of gluetun control server
-      - RECHECK_TIME=60  # number of seconds between checks to gluetun server for port
-      - TZ=Asia/Kolkata
-    healthcheck:
-      test: ["CMD", "curl", "-H", "Authorization: $controlServerAuthKey", "-s", "http://localhost:8000/v1/openvpn/status", "|", "grep", "-q", '{"status":"running"}']
-      interval: 30s
-      timeout: 10s
-      start_period: 60s
-      retries: 3
 
 networks:
   proxy-network:
