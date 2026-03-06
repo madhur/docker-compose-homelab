@@ -1,0 +1,29 @@
+services:
+
+  server:
+    image: prefecthq/prefect:3-latest
+    container_name: prefect-server
+    restart: unless-stopped
+    command: prefect server start
+    environment:
+      - PREFECT_SERVER_API_HOST=0.0.0.0
+      - PREFECT_UI_API_URL=https://prefect.desktop.madhur.co.in/api
+    volumes:
+      - ./data:/root/.prefect
+    ports:
+      - 4200:4200
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prefect.rule=Host(`prefect.desktop.madhur.co.in`)"
+      - "traefik.http.routers.prefect.entrypoints=websecure"
+      - "traefik.http.routers.prefect.tls.certresolver=letencrypt"
+      - "traefik.http.services.prefect.loadbalancer.server.port=4200"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.prefect.middlewares=vpn-whitelist"
+      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+
+networks:
+  proxy-network:
+    external: true

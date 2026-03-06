@@ -1,0 +1,23 @@
+services:
+  convertx:
+    image: ghcr.io/c4illin/convertx:latest
+    container_name: convertx
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - ACCOUNT_REGISTRATION=false
+    volumes:
+      - ./data:/app/data
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.convertx.rule=Host(`convertx.desktop.madhur.co.in`)"
+      - "traefik.http.routers.convertx.entrypoints=websecure"
+      - "traefik.http.routers.convertx.tls.certresolver=letencrypt"
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

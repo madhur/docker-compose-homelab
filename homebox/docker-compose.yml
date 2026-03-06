@@ -1,0 +1,24 @@
+services:
+  homebox:
+    image: ghcr.io/sysadminsmedia/homebox:latest
+    container_name: homebox
+    restart: unless-stopped
+    environment:
+      - HBOX_LOG_LEVEL=info
+      - HBOX_LOG_FORMAT=text
+      - HBOX_WEB_MAX_UPLOAD_SIZE=10
+    volumes:
+      - ./data:/data
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homebox.rule=Host(`homebox.desktop.madhur.co.in`)"
+      - "traefik.http.routers.homebox.entrypoints=websecure"
+      - "traefik.http.routers.homebox.tls.certresolver=letencrypt"
+      - "traefik.http.services.homebox.loadbalancer.server.port=7745"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true
