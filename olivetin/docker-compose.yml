@@ -5,6 +5,8 @@ services:
     volumes:
       - ./OliveTin-config:/config # replace host path or volume as needed
     restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
     networks:
       - proxy-network
     labels:
