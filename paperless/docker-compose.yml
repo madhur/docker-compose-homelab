@@ -29,31 +29,14 @@
 # For more extensive installation and update instructions, refer to the
 # documentation.
 services:
-  # broker:
-  #   image: docker.io/library/redis:8
-  #   restart: unless-stopped
-  #   volumes:
-  #     - redisdata:/data
-  #   networks:
-  #     - proxy-network
-  db:
-    image: docker.io/library/postgres:17
-    restart: unless-stopped
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: paperless
-      POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: paperless
-    networks:
-      - proxy-network
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
     restart: unless-stopped
     depends_on:
-      - db
       - gotenberg
       - tika
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # ports:
     #   - "8000:8000"
     volumes:
@@ -74,8 +57,10 @@ services:
     networks:
       - proxy-network
     environment:
-      PAPERLESS_REDIS: redis://local.madhur.co.in:6379
-      PAPERLESS_DBHOST: db
+      PAPERLESS_REDIS: redis://host.docker.internal:6379
+      PAPERLESS_DBHOST: host.docker.internal
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: paperless
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
       PAPERLESS_TIKA_ENDPOINT: http://tika:9998
