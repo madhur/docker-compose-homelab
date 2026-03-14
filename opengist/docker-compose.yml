@@ -7,7 +7,7 @@ services:
     #   - "6157:6157" # HTTP port
     #   - "2222:2222" # SSH port, can be removed if you don't use SSH
     volumes:
-      - "$HOME/.opengist:/opengist"
+      - "./data:/opengist"
     networks:
       - proxy-network
     labels:

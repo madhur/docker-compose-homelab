@@ -12,11 +12,23 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.convertx-local.rule=Host(`convertx.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.convertx-local.entrypoints=websecure"
+      - "traefik.http.routers.convertx-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.convertx-local.service=convertx"
+      - "traefik.http.routers.convertx-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.convertx.rule=Host(`convertx.desktop.madhur.co.in`)"
       - "traefik.http.routers.convertx.entrypoints=websecure"
       - "traefik.http.routers.convertx.tls.certresolver=letencrypt"
-      - "traefik.http.services.convertx.loadbalancer.server.port=3000"
-      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.convertx.middlewares=authentik@file"
+      - "traefik.http.routers.convertx.service=convertx"
+      - "traefik.http.routers.convertx.priority=1"
 
 networks:
   proxy-network:

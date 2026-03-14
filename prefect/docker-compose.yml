@@ -16,13 +16,23 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.prefect.loadbalancer.server.port=4200"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.prefect-local.rule=Host(`prefect.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.prefect-local.entrypoints=websecure"
+      - "traefik.http.routers.prefect-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.prefect-local.service=prefect"
+      - "traefik.http.routers.prefect-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.prefect.rule=Host(`prefect.desktop.madhur.co.in`)"
       - "traefik.http.routers.prefect.entrypoints=websecure"
       - "traefik.http.routers.prefect.tls.certresolver=letencrypt"
-      - "traefik.http.services.prefect.loadbalancer.server.port=4200"
-      - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.prefect.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.prefect.middlewares=authentik@file"
+      - "traefik.http.routers.prefect.service=prefect"
+      - "traefik.http.routers.prefect.priority=1"
 
 networks:
   proxy-network:

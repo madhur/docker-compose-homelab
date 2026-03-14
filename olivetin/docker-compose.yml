@@ -11,16 +11,24 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.olivetin.loadbalancer.server.port=1337"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.olivetin-local.rule=Host(`olivetin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.olivetin-local.entrypoints=websecure"
+      - "traefik.http.routers.olivetin-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.olivetin-local.service=olivetin"
+      - "traefik.http.routers.olivetin-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.olivetin.rule=Host(`olivetin.desktop.madhur.co.in`)"
       - "traefik.http.routers.olivetin.entrypoints=websecure"
-      - "traefik.http.services.olivetin.loadbalancer.server.port=1337"
       - "traefik.http.routers.olivetin.tls.certresolver=letencrypt"
-      - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.olivetin.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.olivetin.middlewares=authentik@file"
+      - "traefik.http.routers.olivetin.service=olivetin"
+      - "traefik.http.routers.olivetin.priority=1"
 
 networks:
   proxy-network:
     external: true
-
-

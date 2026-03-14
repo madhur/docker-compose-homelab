@@ -13,11 +13,23 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.homebox.loadbalancer.server.port=7745"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.homebox-local.rule=Host(`homebox.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.homebox-local.entrypoints=websecure"
+      - "traefik.http.routers.homebox-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.homebox-local.service=homebox"
+      - "traefik.http.routers.homebox-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.homebox.rule=Host(`homebox.desktop.madhur.co.in`)"
       - "traefik.http.routers.homebox.entrypoints=websecure"
       - "traefik.http.routers.homebox.tls.certresolver=letencrypt"
-      - "traefik.http.services.homebox.loadbalancer.server.port=7745"
-      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.homebox.middlewares=authentik@file"
+      - "traefik.http.routers.homebox.service=homebox"
+      - "traefik.http.routers.homebox.priority=1"
 
 networks:
   proxy-network:

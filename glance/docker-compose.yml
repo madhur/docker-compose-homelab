@@ -11,11 +11,23 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.glance.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.glance-local.rule=Host(`glance.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.glance-local.entrypoints=websecure"
+      - "traefik.http.routers.glance-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.glance-local.service=glance"
+      - "traefik.http.routers.glance-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.glance.rule=Host(`glance.desktop.madhur.co.in`)"
       - "traefik.http.routers.glance.entrypoints=websecure"
-      - "traefik.http.services.glance.loadbalancer.server.port=8080"
       - "traefik.http.routers.glance.tls.certresolver=letencrypt"
-      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.glance.middlewares=authentik@file"
+      - "traefik.http.routers.glance.service=glance"
+      - "traefik.http.routers.glance.priority=1"
 
 networks:
   proxy-network:
