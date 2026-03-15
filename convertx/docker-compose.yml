@@ -16,7 +16,7 @@ services:
       - "traefik.http.services.convertx.loadbalancer.server.port=3000"
 
       # LAN/VPN router: no auth (higher priority)
-      - "traefik.http.routers.convertx-local.rule=Host(`convertx.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.convertx-local.rule=Host(`convertx.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
       - "traefik.http.routers.convertx-local.entrypoints=websecure"
       - "traefik.http.routers.convertx-local.tls.certresolver=letencrypt"
       - "traefik.http.routers.convertx-local.service=convertx"

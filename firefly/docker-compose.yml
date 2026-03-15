@@ -1,0 +1,50 @@
+services:
+  app:
+    image: fireflyiii/core:latest
+    container_name: firefly
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
+      - APP_KEY=base64:gQVKI5Ru6D4lKYTo+r99lC7+6/XvBDHGC/E6HuhxeM8=
+      - DB_CONNECTION=sqlite
+      - APP_URL=https://firefly.desktop.madhur.co.in
+      - TRUSTED_PROXIES=**
+      - STATIC_CRON_TOKEN=51bf4eec8cc15217fe9fc97c4912f1a4
+    volumes:
+      - ./upload:/var/www/html/storage/upload
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.firefly.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.firefly-local.rule=Host(`firefly.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.firefly-local.entrypoints=websecure"
+      - "traefik.http.routers.firefly-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.firefly-local.service=firefly"
+      - "traefik.http.routers.firefly-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.firefly.rule=Host(`firefly.desktop.madhur.co.in`)"
+      - "traefik.http.routers.firefly.entrypoints=websecure"
+      - "traefik.http.routers.firefly.tls.certresolver=letencrypt"
+      - "traefik.http.routers.firefly.middlewares=authentik@file"
+      - "traefik.http.routers.firefly.service=firefly"
+      - "traefik.http.routers.firefly.priority=1"
+
+  cron:
+    image: alpine
+    container_name: firefly-cron
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
+    command: >
+      sh -c "echo '*/30 * * * * wget -qO- http://app:8080/api/v1/cron/51bf4eec8cc15217fe9fc97c4912f1a4' | crontab - && crond -f -L /dev/stdout"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

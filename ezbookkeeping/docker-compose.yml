@@ -1,0 +1,37 @@
+services:
+  ezbookkeeping:
+    image: mayswind/ezbookkeeping:latest
+    container_name: ezbookkeeping
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
+      - EBK_SERVER_DOMAIN=ezbookkeeping.desktop.madhur.co.in
+      - EBK_SERVER_ENABLE_HTTPS=false
+      - EBK_SECURITY_SECRET_KEY=75ec0fcbb3c158f679d6cf94a05b5174bcdcbd4161f220dd52ffe6382454d317
+    volumes:
+      - ./data:/ezbookkeeping/data
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.ezbookkeeping.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.ezbookkeeping-local.rule=Host(`ezbookkeeping.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.ezbookkeeping-local.entrypoints=websecure"
+      - "traefik.http.routers.ezbookkeeping-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.ezbookkeeping-local.service=ezbookkeeping"
+      - "traefik.http.routers.ezbookkeeping-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.ezbookkeeping.rule=Host(`ezbookkeeping.desktop.madhur.co.in`)"
+      - "traefik.http.routers.ezbookkeeping.entrypoints=websecure"
+      - "traefik.http.routers.ezbookkeeping.tls.certresolver=letencrypt"
+      - "traefik.http.routers.ezbookkeeping.middlewares=authentik@file"
+      - "traefik.http.routers.ezbookkeeping.service=ezbookkeeping"
+      - "traefik.http.routers.ezbookkeeping.priority=1"
+
+networks:
+  proxy-network:
+    external: true

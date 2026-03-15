@@ -1,0 +1,59 @@
+services:
+  frontend:
+    image: ghcr.io/afaneca/myfin-frontend:latest
+    container_name: myfin-frontend
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
+      - REACT_APP_API_URL=https://myfin-api.desktop.madhur.co.in
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.myfin.loadbalancer.server.port=80"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.myfin-local.rule=Host(`myfin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.myfin-local.entrypoints=websecure"
+      - "traefik.http.routers.myfin-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.myfin-local.service=myfin"
+      - "traefik.http.routers.myfin-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.myfin.rule=Host(`myfin.desktop.madhur.co.in`)"
+      - "traefik.http.routers.myfin.entrypoints=websecure"
+      - "traefik.http.routers.myfin.tls.certresolver=letencrypt"
+      - "traefik.http.routers.myfin.middlewares=authentik@file"
+      - "traefik.http.routers.myfin.service=myfin"
+      - "traefik.http.routers.myfin.priority=1"
+
+  api:
+    image: ghcr.io/afaneca/myfin-api:latest
+    container_name: myfin-api
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Kolkata
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=test
+      - DB_NAME=myfin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.myfin-api.loadbalancer.server.port=3001"
+
+      # Single router, no Authentik (API has its own session auth)
+      - "traefik.http.routers.myfin-api.rule=Host(`myfin-api.desktop.madhur.co.in`)"
+      - "traefik.http.routers.myfin-api.entrypoints=websecure"
+      - "traefik.http.routers.myfin-api.tls.certresolver=letencrypt"
+      - "traefik.http.routers.myfin-api.service=myfin-api"
+
+networks:
+  proxy-network:
+    external: true

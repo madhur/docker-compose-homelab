@@ -2,6 +2,7 @@
 services:
   app:
     image: lissy93/networking-toolbox:latest
+    container_name: networkingtoolbox
     # ports:
     #   - "3000:3000"
     environment:
@@ -10,24 +11,17 @@ services:
       - HOST=0.0.0.0
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      disable: true
     networks:
       - proxy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nt.rule=Host(`nt.desktop.madhur.co.in`)"
-      - "traefik.http.routers.nt.entrypoints=web"
-      - "traefik.http.services.nt.loadbalancer.server.port=3000"
+      - "traefik.http.routers.networktoolbox.rule=Host(`nt.desktop.madhur.co.in`)"
+      - "traefik.http.routers.networktoolbox.entrypoints=websecure"
+      - "traefik.http.routers.networktoolbox.tls.certresolver=letencrypt"
+      - "traefik.http.services.networktoolbox.loadbalancer.server.port=3000"
       - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.nt.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
-
-
-
+      - "traefik.http.routers.networktoolbox.middlewares=vpn-whitelist@docker"
 
 networks:
   proxy-network:

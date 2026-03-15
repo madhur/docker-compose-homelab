@@ -1,0 +1,65 @@
+services:
+  dawarich_app:
+    image: freikin/dawarich:latest
+    container_name: dawarich_app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data/public:/var/app/public
+      - ./data/watched:/var/app/tmp/imports/watched
+      - ./data/storage:/var/app/storage
+    networks:
+      - proxy-network
+    stdin_open: true
+    tty: true
+    entrypoint: web-entrypoint.sh
+    command: ['bin/rails', 'server', '-p', '3000', '-b', '::']
+    restart: unless-stopped
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dawarich.rule=Host(`dawarich.desktop.madhur.co.in`)"
+      - "traefik.http.routers.dawarich.entrypoints=websecure"
+      - "traefik.http.routers.dawarich.tls.certresolver=letencrypt"
+      - "traefik.http.services.dawarich.loadbalancer.server.port=3000"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.middlewares.dawarich-ws.headers.customRequestHeaders.X-Forwarded-Proto=https"
+      - "traefik.http.routers.dawarich.middlewares=dawarich-ws"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f puma"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 5s
+
+  dawarich_sidekiq:
+    image: freikin/dawarich:latest
+    container_name: dawarich_sidekiq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data/public:/var/app/public
+      - ./data/watched:/var/app/tmp/imports/watched
+      - ./data/storage:/var/app/storage
+    networks:
+      - proxy-network
+    stdin_open: true
+    tty: true
+    entrypoint: sidekiq-entrypoint.sh
+    command: ['sidekiq']
+    restart: on-failure
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f sidekiq"]
+      interval: 10s
+      retries: 30
+      start_period: 30s
+      timeout: 10s
+    depends_on:
+      dawarich_app:
+        condition: service_healthy
+        restart: true
+
+networks:
+  proxy-network:
+    external: true

@@ -1,0 +1,43 @@
+services:
+  termix:
+    image: ghcr.io/lukegus/termix:latest
+    container_name: termix
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    environment:
+      PORT: '8080'
+    depends_on:
+      - guacd
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.termix.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.termix-local.rule=Host(`termix.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.termix-local.entrypoints=websecure"
+      - "traefik.http.routers.termix-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.termix-local.service=termix"
+      - "traefik.http.routers.termix-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.termix.rule=Host(`termix.desktop.madhur.co.in`)"
+      - "traefik.http.routers.termix.entrypoints=websecure"
+      - "traefik.http.routers.termix.tls.certresolver=letencrypt"
+      - "traefik.http.routers.termix.middlewares=authentik@file"
+      - "traefik.http.routers.termix.service=termix"
+      - "traefik.http.routers.termix.priority=1"
+
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

@@ -13,7 +13,7 @@ services:
       - "traefik.http.services.jc.loadbalancer.server.port=8080"
 
       # LAN/VPN router: no auth (higher priority)
-      - "traefik.http.routers.jc-local.rule=Host(`jc.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.jc-local.rule=Host(`jc.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
       - "traefik.http.routers.jc-local.entrypoints=websecure"
       - "traefik.http.routers.jc-local.tls.certresolver=letencrypt"
       - "traefik.http.routers.jc-local.service=jc"

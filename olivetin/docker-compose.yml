@@ -15,7 +15,7 @@ services:
       - "traefik.http.services.olivetin.loadbalancer.server.port=1337"
 
       # LAN/VPN router: no auth (higher priority)
-      - "traefik.http.routers.olivetin-local.rule=Host(`olivetin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.olivetin-local.rule=Host(`olivetin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
       - "traefik.http.routers.olivetin-local.entrypoints=websecure"
       - "traefik.http.routers.olivetin-local.tls.certresolver=letencrypt"
       - "traefik.http.routers.olivetin-local.service=olivetin"

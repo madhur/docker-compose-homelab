@@ -20,7 +20,7 @@ services:
       - "traefik.http.services.prefect.loadbalancer.server.port=4200"
 
       # LAN/VPN router: no auth (higher priority)
-      - "traefik.http.routers.prefect-local.rule=Host(`prefect.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`))"
+      - "traefik.http.routers.prefect-local.rule=Host(`prefect.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
       - "traefik.http.routers.prefect-local.entrypoints=websecure"
       - "traefik.http.routers.prefect-local.tls.certresolver=letencrypt"
       - "traefik.http.routers.prefect-local.service=prefect"

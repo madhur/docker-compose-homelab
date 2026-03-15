@@ -26,11 +26,21 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy-network"
       - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.jellyfin-local.rule=Host(`jf.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.jellyfin-local.entrypoints=websecure"
+      - "traefik.http.routers.jellyfin-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.jellyfin-local.service=jellyfin"
+      - "traefik.http.routers.jellyfin-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.jellyfin.rule=Host(`jf.desktop.madhur.co.in`)"
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls.certresolver=letencrypt"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
-      - "traefik.http.routers.jellyfin.middlewares=vpn-whitelist"
+      - "traefik.http.routers.jellyfin.middlewares=authentik@file"
+      - "traefik.http.routers.jellyfin.service=jellyfin"
+      - "traefik.http.routers.jellyfin.priority=1"
 
 networks:
   proxy-network:

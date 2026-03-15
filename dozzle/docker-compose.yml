@@ -7,3 +7,26 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.dozzle-local.rule=Host(`dozzle.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.dozzle-local.entrypoints=websecure"
+      - "traefik.http.routers.dozzle-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.dozzle-local.service=dozzle"
+      - "traefik.http.routers.dozzle-local.priority=10"
+      # Internet router: Authentik auth (lower priority)
+      - "traefik.http.routers.dozzle.rule=Host(`dozzle.desktop.madhur.co.in`)"
+      - "traefik.http.routers.dozzle.entrypoints=websecure"
+      - "traefik.http.routers.dozzle.tls.certresolver=letencrypt"
+      - "traefik.http.routers.dozzle.middlewares=authentik@file"
+      - "traefik.http.routers.dozzle.service=dozzle"
+      - "traefik.http.routers.dozzle.priority=1"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

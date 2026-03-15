@@ -1,0 +1,32 @@
+services:
+  invoiceshelf:
+    image: invoiceshelf/invoiceshelf:nightly
+    container_name: invoiceshelf
+    restart: unless-stopped
+    environment:
+      - APP_NAME=InvoiceShelf
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://invoiceshelf.desktop.madhur.co.in
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/storage/app/database.sqlite
+      - CACHE_STORE=file
+      - SESSION_DRIVER=file
+      - SESSION_LIFETIME=240
+      - SESSION_DOMAIN=invoiceshelf.desktop.madhur.co.in
+      - SANCTUM_STATEFUL_DOMAINS=invoiceshelf.desktop.madhur.co.in
+    volumes:
+      - ./data:/var/www/html/storage
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.invoiceshelf.rule=Host(`invoiceshelf.desktop.madhur.co.in`)"
+      - "traefik.http.routers.invoiceshelf.entrypoints=websecure"
+      - "traefik.http.routers.invoiceshelf.tls.certresolver=letencrypt"
+      - "traefik.http.services.invoiceshelf.loadbalancer.server.port=8080"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

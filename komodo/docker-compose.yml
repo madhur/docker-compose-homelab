@@ -36,6 +36,24 @@ services:
       - ./core/repos:/repo-cache
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+      traefik.enable: "true"
+      traefik.docker.network: proxy-network
+      traefik.http.services.komodo.loadbalancer.server.port: "9120"
+      # LAN/VPN router: no auth (higher priority)
+      traefik.http.routers.komodo-local.rule: "Host(`komodo.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      traefik.http.routers.komodo-local.entrypoints: websecure
+      traefik.http.routers.komodo-local.tls.certresolver: letencrypt
+      traefik.http.routers.komodo-local.service: komodo
+      traefik.http.routers.komodo-local.priority: "10"
+      # Internet router: Authentik auth (lower priority)
+      traefik.http.routers.komodo.rule: "Host(`komodo.desktop.madhur.co.in`)"
+      traefik.http.routers.komodo.entrypoints: websecure
+      traefik.http.routers.komodo.tls.certresolver: letencrypt
+      traefik.http.routers.komodo.middlewares: authentik@file
+      traefik.http.routers.komodo.service: komodo
+      traefik.http.routers.komodo.priority: "1"
+    networks:
+      - proxy-network
 
   periphery:
     image: ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-latest}
@@ -60,3 +78,6 @@ services:
       - /home/madhur/docker:/mnt/user/compose
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
+networks:
+  proxy-network:
+    external: true

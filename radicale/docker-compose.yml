@@ -1,0 +1,23 @@
+services:
+  radicale:
+    image: tomsquest/docker-radicale
+    container_name: radicale
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./data:/data
+      - ./config:/config:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radicale.rule=Host(`radiscale.desktop.madhur.co.in`)"
+      - "traefik.http.routers.radicale.entrypoints=websecure"
+      - "traefik.http.routers.radicale.tls.certresolver=letencrypt"
+      - "traefik.http.services.radicale.loadbalancer.server.port=5232"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true

@@ -16,13 +16,23 @@ services:
       - ./bookstack_app_data:/config
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.bookstack.loadbalancer.server.port=80"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.bookstack-local.rule=Host(`bookstack.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.bookstack-local.entrypoints=websecure"
+      - "traefik.http.routers.bookstack-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.bookstack-local.service=bookstack"
+      - "traefik.http.routers.bookstack-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.bookstack.rule=Host(`bookstack.desktop.madhur.co.in`)"
       - "traefik.http.routers.bookstack.entrypoints=websecure"
-      - "traefik.http.services.bookstack.loadbalancer.server.port=80"
       - "traefik.http.routers.bookstack.tls.certresolver=letencrypt"
-      - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.bookstack.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.bookstack.middlewares=authentik@file"
+      - "traefik.http.routers.bookstack.service=bookstack"
+      - "traefik.http.routers.bookstack.priority=1"
     networks:
       - proxy-network
     ports:

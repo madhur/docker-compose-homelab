@@ -1,0 +1,38 @@
+services:
+  akhq:
+    image: tchiotludo/akhq:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8085:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            local-kafka:
+              properties:
+                bootstrap.servers: "local.madhur.co.in:9092"
+    extra_hosts:
+      - "local.madhur.co.in:host-gateway"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.akhq.loadbalancer.server.port=8080"
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.akhq-local.rule=Host(`akhq.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.akhq-local.entrypoints=websecure"
+      - "traefik.http.routers.akhq-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.akhq-local.service=akhq"
+      - "traefik.http.routers.akhq-local.priority=10"
+      # Internet router: Authentik auth (lower priority)
+      - "traefik.http.routers.akhq.rule=Host(`akhq.desktop.madhur.co.in`)"
+      - "traefik.http.routers.akhq.entrypoints=websecure"
+      - "traefik.http.routers.akhq.tls.certresolver=letencrypt"
+      - "traefik.http.routers.akhq.middlewares=authentik@file"
+      - "traefik.http.routers.akhq.service=akhq"
+      - "traefik.http.routers.akhq.priority=1"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
