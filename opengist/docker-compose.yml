@@ -12,13 +12,23 @@ services:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.opengist.loadbalancer.server.port=6157"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.opengist-local.rule=Host(`og.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.opengist-local.entrypoints=websecure"
+      - "traefik.http.routers.opengist-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.opengist-local.service=opengist"
+      - "traefik.http.routers.opengist-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.opengist.rule=Host(`og.desktop.madhur.co.in`)"
       - "traefik.http.routers.opengist.entrypoints=websecure"
-      - "traefik.http.services.opengist.loadbalancer.server.port=6157"
       - "traefik.http.routers.opengist.tls.certresolver=letencrypt"
-      - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.opengist.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.opengist.middlewares=authentik@file"
+      - "traefik.http.routers.opengist.service=opengist"
+      - "traefik.http.routers.opengist.priority=1"
 
 
 

@@ -18,13 +18,23 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.sterlingpdf.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.sterlingpdf-local.rule=Host(`pdf.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.sterlingpdf-local.entrypoints=websecure"
+      - "traefik.http.routers.sterlingpdf-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.sterlingpdf-local.service=sterlingpdf"
+      - "traefik.http.routers.sterlingpdf-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.sterlingpdf.rule=Host(`pdf.desktop.madhur.co.in`)"
       - "traefik.http.routers.sterlingpdf.entrypoints=websecure"
-      - "traefik.http.services.sterlingpdf.loadbalancer.server.port=8080"
       - "traefik.http.routers.sterlingpdf.tls.certresolver=letencrypt"
-      - "traefik.docker.network=proxy-network"
-      - "traefik.http.routers.sterlingpdf.middlewares=vpn-whitelist"
-      - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+      - "traefik.http.routers.sterlingpdf.middlewares=authentik@file"
+      - "traefik.http.routers.sterlingpdf.service=sterlingpdf"
+      - "traefik.http.routers.sterlingpdf.priority=1"
 
 
 networks:
