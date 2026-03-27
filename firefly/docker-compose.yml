@@ -12,6 +12,7 @@ services:
       - STATIC_CRON_TOKEN=51bf4eec8cc15217fe9fc97c4912f1a4
     volumes:
       - ./upload:/var/www/html/storage/upload
+      - ./database:/var/www/html/storage/database
     networks:
       - proxy-network
     labels:

@@ -1,0 +1,99 @@
+services:
+  hoppscotch-backend:
+    image: hoppscotch/hoppscotch-backend:latest
+    container_name: hoppscotch-backend
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      hoppscotch-backend-migrate:
+        condition: service_completed_successfully
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.hopp-backend.loadbalancer.server.port=3170"
+      # LAN/VPN router: no auth
+      - "traefik.http.routers.hopp-backend-local.rule=Host(`hopp-backend.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.hopp-backend-local.entrypoints=websecure"
+      - "traefik.http.routers.hopp-backend-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp-backend-local.service=hopp-backend"
+      - "traefik.http.routers.hopp-backend-local.priority=10"
+      # Internet router: Authentik auth
+      - "traefik.http.routers.hopp-backend.rule=Host(`hopp-backend.desktop.madhur.co.in`)"
+      - "traefik.http.routers.hopp-backend.entrypoints=websecure"
+      - "traefik.http.routers.hopp-backend.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp-backend.middlewares=authentik@file"
+      - "traefik.http.routers.hopp-backend.service=hopp-backend"
+      - "traefik.http.routers.hopp-backend.priority=1"
+    networks:
+      - proxy-network
+
+  hoppscotch-backend-migrate:
+    image: hoppscotch/hoppscotch-backend:latest
+    container_name: hoppscotch-backend-migrate
+    env_file:
+      - .env
+    command: ["pnpx", "prisma", "migrate", "deploy"]
+    restart: no
+    networks:
+      - proxy-network
+
+  hoppscotch-frontend:
+    image: hoppscotch/hoppscotch-frontend:latest
+    container_name: hoppscotch-frontend
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - hoppscotch-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.hopp.loadbalancer.server.port=3000"
+      # LAN/VPN router: no auth
+      - "traefik.http.routers.hopp-local.rule=Host(`hopp.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.hopp-local.entrypoints=websecure"
+      - "traefik.http.routers.hopp-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp-local.service=hopp"
+      - "traefik.http.routers.hopp-local.priority=10"
+      # Internet router: Authentik auth
+      - "traefik.http.routers.hopp.rule=Host(`hopp.desktop.madhur.co.in`)"
+      - "traefik.http.routers.hopp.entrypoints=websecure"
+      - "traefik.http.routers.hopp.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp.middlewares=authentik@file"
+      - "traefik.http.routers.hopp.service=hopp"
+      - "traefik.http.routers.hopp.priority=1"
+    networks:
+      - proxy-network
+
+  hoppscotch-admin:
+    image: hoppscotch/hoppscotch-admin:latest
+    container_name: hoppscotch-admin
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - hoppscotch-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.hopp-admin.loadbalancer.server.port=3100"
+      # LAN/VPN router: no auth
+      - "traefik.http.routers.hopp-admin-local.rule=Host(`hopp-admin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.hopp-admin-local.entrypoints=websecure"
+      - "traefik.http.routers.hopp-admin-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp-admin-local.service=hopp-admin"
+      - "traefik.http.routers.hopp-admin-local.priority=10"
+      # Internet router: Authentik auth
+      - "traefik.http.routers.hopp-admin.rule=Host(`hopp-admin.desktop.madhur.co.in`)"
+      - "traefik.http.routers.hopp-admin.entrypoints=websecure"
+      - "traefik.http.routers.hopp-admin.tls.certresolver=letencrypt"
+      - "traefik.http.routers.hopp-admin.middlewares=authentik@file"
+      - "traefik.http.routers.hopp-admin.service=hopp-admin"
+      - "traefik.http.routers.hopp-admin.priority=1"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
