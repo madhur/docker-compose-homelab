@@ -4,7 +4,7 @@ This repository contains Docker Compose configurations for various self-hosted s
 
 ## Architecture Overview
 
-![Homelab Architecture](https://raw.githubusercontent.com/madhur/docker-compose-examples/master/homelab-architecture.drawio.png)
+![Homelab Architecture](https://raw.githubusercontent.com/madhur/docker-compose-homelab/master/homelab-architecture.drawio.png)
 
 - **Reverse Proxy**: Traefik with Let's Encrypt SSL certificates
 - **Network**: External `proxy-network` for service communication
