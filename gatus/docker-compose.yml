@@ -5,15 +5,28 @@ services:
     restart: unless-stopped
     volumes:
       - ./config:/config
+      - ./data:/data
     networks:
       - proxy-network
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.gatus.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.gatus-local.rule=Host(`gatus.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.gatus-local.entrypoints=websecure"
+      - "traefik.http.routers.gatus-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.gatus-local.service=gatus"
+      - "traefik.http.routers.gatus-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
       - "traefik.http.routers.gatus.rule=Host(`gatus.desktop.madhur.co.in`)"
       - "traefik.http.routers.gatus.entrypoints=websecure"
       - "traefik.http.routers.gatus.tls.certresolver=letencrypt"
-      - "traefik.http.services.gatus.loadbalancer.server.port=8080"
-      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.gatus.middlewares=authentik@file"
+      - "traefik.http.routers.gatus.service=gatus"
+      - "traefik.http.routers.gatus.priority=1"
 
 networks:
   proxy-network:

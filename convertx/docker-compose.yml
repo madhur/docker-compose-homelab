@@ -6,6 +6,7 @@ services:
     environment:
       - JWT_SECRET=${JWT_SECRET}
       - ACCOUNT_REGISTRATION=false
+      - ALLOW_UNAUTHENTICATED=true
     volumes:
       - ./data:/app/data
     networks:

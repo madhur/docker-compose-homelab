@@ -10,7 +10,8 @@ services:
       - ./data:/datastore
     restart: unless-stopped
     depends_on:
-      - playwright-chrome
+      playwright-chrome:
+        condition: service_healthy
     labels:
         - "traefik.enable=true"
         - "traefik.http.routers.changedetection.rule=Host(`cd.desktop.madhur.co.in`)"
@@ -38,6 +39,12 @@ services:
       - DEFAULT_BLOCK_ADS=true
       - DEFAULT_STEALTH=true
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/json/version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - proxy-network
 

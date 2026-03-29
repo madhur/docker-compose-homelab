@@ -5,6 +5,8 @@
 !*/
 
 !README.md
+!*.drawio
+!*.png
 
 # Allow config files
 !**/docker-compose.yml

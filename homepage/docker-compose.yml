@@ -6,6 +6,7 @@ services:
     env_file: .env
     volumes:
       - ./config:/app/config
+      - ./icons:/app/public/icons
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - PUID=1000
