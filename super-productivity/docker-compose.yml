@@ -1,0 +1,86 @@
+services:
+  super-productivity:
+    image: johannesjo/super-productivity:latest
+    container_name: super-productivity
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.super-productivity.loadbalancer.server.port=80"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.super-productivity-local.rule=Host(`sp.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.super-productivity-local.entrypoints=websecure"
+      - "traefik.http.routers.super-productivity-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.super-productivity-local.service=super-productivity"
+      - "traefik.http.routers.super-productivity-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.super-productivity.rule=Host(`sp.desktop.madhur.co.in`)"
+      - "traefik.http.routers.super-productivity.entrypoints=websecure"
+      - "traefik.http.routers.super-productivity.tls.certresolver=letencrypt"
+      - "traefik.http.routers.super-productivity.middlewares=authentik@file"
+      - "traefik.http.routers.super-productivity.service=super-productivity"
+      - "traefik.http.routers.super-productivity.priority=1"
+
+  super-productivity-sync:
+    image: iari/supersync:latest
+    container_name: super-productivity-sync
+    restart: unless-stopped
+    environment:
+      - PORT=1900
+      - DATABASE_URL=postgresql://supersync:${POSTGRES_PASSWORD}@super-productivity-db:5432/supersync
+      - JWT_SECRET=${JWT_SECRET}
+      - PUBLIC_URL=https://sp-sync.desktop.madhur.co.in
+      - CORS_ORIGINS=https://sp.desktop.madhur.co.in,https://app.super-productivity.com
+    depends_on:
+      super-productivity-db:
+        condition: service_healthy
+    networks:
+      - proxy-network
+      - sp-internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.super-productivity-sync.loadbalancer.server.port=1900"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.super-productivity-sync-local.rule=Host(`sp-sync.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.super-productivity-sync-local.entrypoints=websecure"
+      - "traefik.http.routers.super-productivity-sync-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.super-productivity-sync-local.service=super-productivity-sync"
+      - "traefik.http.routers.super-productivity-sync-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.super-productivity-sync.rule=Host(`sp-sync.desktop.madhur.co.in`)"
+      - "traefik.http.routers.super-productivity-sync.entrypoints=websecure"
+      - "traefik.http.routers.super-productivity-sync.tls.certresolver=letencrypt"
+      - "traefik.http.routers.super-productivity-sync.middlewares=authentik@file"
+      - "traefik.http.routers.super-productivity-sync.service=super-productivity-sync"
+      - "traefik.http.routers.super-productivity-sync.priority=1"
+
+  super-productivity-db:
+    image: postgres:16-alpine
+    container_name: super-productivity-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=supersync
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=supersync
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - sp-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supersync -d supersync"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  proxy-network:
+    external: true
+  sp-internal:
+    internal: true

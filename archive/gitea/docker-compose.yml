@@ -1,0 +1,39 @@
+services:
+
+  server:
+    image: gitea/gitea:1.23.7
+    container_name: gitea-server
+    container_name: gitea-server
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=local.madhur.co.in:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=postgres
+      - GITEA__database__PASSWD=${GITEA_DB_PASSWORD}
+    volumes:
+      # replace the left-hand side from the ':' with your own path
+      - ./data:/data
+    ports:
+      - 3105:3000
+      - 222:22
+
+  runner:
+    image: gitea/act_runner:0.2.11
+    container_name: gitea_runner
+    restart: unless-stopped
+    depends_on:
+      - server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # replace the left-hand side from the ':' with your own path
+      - ./config.yaml:/config.yaml
+      # replace the left-hand side from the ':' with your own path
+      - ./data:/data
+    environment:
+      - TZ=Asia/Kolkata
+      - CONFIG_FILE=/config.yaml
+      - GITEA_INSTANCE_URL=gitea-server:3000
+      - GITEA_RUNNER_REGISTRATION_TOKEN=${GITEA_RUNNER_TOKEN}
+      - GITEA_RUNNER_NAME=your-runner-name # change this

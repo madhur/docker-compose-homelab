@@ -74,6 +74,7 @@ services:
       PAPERLESS_TIKA_ENABLED: 1
       PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
       PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_AUDIT_LOG_ENABLED: false
   gotenberg:
     image: docker.io/gotenberg/gotenberg:8.22
     restart: unless-stopped

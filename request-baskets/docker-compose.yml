@@ -1,0 +1,20 @@
+services:
+  request-baskets:
+    image: darklynx/request-baskets:latest
+    container_name: request-baskets
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/lib/rbaskets
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.request-baskets.rule=Host(`req.desktop.madhur.co.in`)"
+      - "traefik.http.routers.request-baskets.entrypoints=websecure"
+      - "traefik.http.routers.request-baskets.tls.certresolver=letencrypt"
+      - "traefik.http.services.request-baskets.loadbalancer.server.port=55555"
+      - "traefik.docker.network=proxy-network"
+
+networks:
+  proxy-network:
+    external: true
