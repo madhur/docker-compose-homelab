@@ -1,0 +1,30 @@
+services:
+  nextcloud:
+    image: nextcloud:latest
+    container_name: nextcloud
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NEXTCLOUD_ADMIN_USER=ahuja.madhur@gmail.com
+      - NEXTCLOUD_ADMIN_PASSWORD=cmu@word10
+      - NEXTCLOUD_TRUSTED_DOMAINS=nc.desktop.madhur.co.in
+      - POSTGRES_HOST=host.docker.internal
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=nextcloud_db_pass
+    volumes:
+      - ./data:/var/www/html
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`nc.desktop.madhur.co.in`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls.certresolver=letencrypt"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-network"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

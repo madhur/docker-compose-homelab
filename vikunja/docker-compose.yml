@@ -1,0 +1,64 @@
+services:
+  vikunja:
+    image: vikunja/vikunja:latest
+    container_name: vikunja
+    restart: unless-stopped
+    environment:
+      - VIKUNJA_DATABASE_HOST=vikunja-db
+      - VIKUNJA_DATABASE_TYPE=postgres
+      - VIKUNJA_DATABASE_USER=vikunja
+      - VIKUNJA_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - VIKUNJA_DATABASE_DATABASE=vikunja
+      - VIKUNJA_SERVICE_JWTSECRET=${JWT_SECRET}
+      - VIKUNJA_SERVICE_PUBLICURL=https://vikunja.desktop.madhur.co.in
+    volumes:
+      - ./files:/app/vikunja/files
+    depends_on:
+      vikunja-db:
+        condition: service_healthy
+    networks:
+      - proxy-network
+      - vikunja-internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.vikunja.loadbalancer.server.port=3456"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.vikunja-local.rule=Host(`vikunja.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.vikunja-local.entrypoints=websecure"
+      - "traefik.http.routers.vikunja-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.vikunja-local.service=vikunja"
+      - "traefik.http.routers.vikunja-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.vikunja.rule=Host(`vikunja.desktop.madhur.co.in`)"
+      - "traefik.http.routers.vikunja.entrypoints=websecure"
+      - "traefik.http.routers.vikunja.tls.certresolver=letencrypt"
+      - "traefik.http.routers.vikunja.middlewares=authentik@file"
+      - "traefik.http.routers.vikunja.service=vikunja"
+      - "traefik.http.routers.vikunja.priority=1"
+
+  vikunja-db:
+    image: postgres:16-alpine
+    container_name: vikunja-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=vikunja
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=vikunja
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    networks:
+      - vikunja-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vikunja -d vikunja"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  proxy-network:
+    external: true
+  vikunja-internal:
+    internal: true

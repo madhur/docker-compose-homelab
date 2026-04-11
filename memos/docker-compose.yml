@@ -1,0 +1,32 @@
+services:
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/opt/memos
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.memos.loadbalancer.server.port=5230"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.memos-local.rule=Host(`memos.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.memos-local.entrypoints=websecure"
+      - "traefik.http.routers.memos-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.memos-local.service=memos"
+      - "traefik.http.routers.memos-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority, catches everything else)
+      - "traefik.http.routers.memos.rule=Host(`memos.desktop.madhur.co.in`)"
+      - "traefik.http.routers.memos.entrypoints=websecure"
+      - "traefik.http.routers.memos.tls.certresolver=letencrypt"
+      - "traefik.http.routers.memos.middlewares=authentik@file"
+      - "traefik.http.routers.memos.service=memos"
+      - "traefik.http.routers.memos.priority=1"
+
+networks:
+  proxy-network:
+    external: true

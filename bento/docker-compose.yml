@@ -1,0 +1,30 @@
+services:
+  bento:
+    image: ghcr.io/alam00000/bentopdf:latest
+    container_name: bento
+    ports:
+      - "127.0.0.1:8090:8080"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.bento.loadbalancer.server.port=8080"
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.bento-local.rule=Host(`bento.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.bento-local.entrypoints=websecure"
+      - "traefik.http.routers.bento-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.bento-local.service=bento"
+      - "traefik.http.routers.bento-local.priority=10"
+      # Internet router: Authentik auth (lower priority)
+      - "traefik.http.routers.bento.rule=Host(`bento.desktop.madhur.co.in`)"
+      - "traefik.http.routers.bento.entrypoints=websecure"
+      - "traefik.http.routers.bento.tls.certresolver=letencrypt"
+      - "traefik.http.routers.bento.middlewares=authentik@file"
+      - "traefik.http.routers.bento.service=bento"
+      - "traefik.http.routers.bento.priority=1"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
