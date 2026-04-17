@@ -26,11 +26,11 @@ services:
       - "traefik.http.routers.bookstack-local.service=bookstack"
       - "traefik.http.routers.bookstack-local.priority=10"
 
-      # Internet router: Authentik auth (lower priority, catches everything else)
+      # Internet router: Tinyauth/PocketID auth (lower priority, catches everything else)
       - "traefik.http.routers.bookstack.rule=Host(`bookstack.desktop.madhur.co.in`)"
       - "traefik.http.routers.bookstack.entrypoints=websecure"
       - "traefik.http.routers.bookstack.tls.certresolver=letencrypt"
-      - "traefik.http.routers.bookstack.middlewares=authentik@file"
+      - "traefik.http.routers.bookstack.middlewares=tinyauth@file"
       - "traefik.http.routers.bookstack.service=bookstack"
       - "traefik.http.routers.bookstack.priority=1"
     networks:

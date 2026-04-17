@@ -1,0 +1,30 @@
+services:
+  tinyauth:
+    image: ghcr.io/steveiliop56/tinyauth:v4
+    container_name: tinyauth
+    restart: unless-stopped
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.tinyauth.loadbalancer.server.port=3000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.tinyauth-local.rule=Host(`tinyauth.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.tinyauth-local.entrypoints=websecure"
+      - "traefik.http.routers.tinyauth-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.tinyauth-local.service=tinyauth"
+      - "traefik.http.routers.tinyauth-local.priority=10"
+
+      # Internet router: no auth middleware (Tinyauth handles its own auth)
+      - "traefik.http.routers.tinyauth.rule=Host(`tinyauth.desktop.madhur.co.in`)"
+      - "traefik.http.routers.tinyauth.entrypoints=websecure"
+      - "traefik.http.routers.tinyauth.tls.certresolver=letencrypt"
+      - "traefik.http.routers.tinyauth.service=tinyauth"
+      - "traefik.http.routers.tinyauth.priority=1"
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true

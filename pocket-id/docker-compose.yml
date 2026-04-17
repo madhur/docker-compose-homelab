@@ -1,0 +1,38 @@
+services:
+  pocket-id:
+    image: ghcr.io/pocket-id/pocket-id
+    container_name: pocket-id
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - "./data:/app/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.pocket-id.loadbalancer.server.port=1411"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.pocket-id-local.rule=Host(`pocket-id.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.pocket-id-local.entrypoints=websecure"
+      - "traefik.http.routers.pocket-id-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.pocket-id-local.service=pocket-id"
+      - "traefik.http.routers.pocket-id-local.priority=10"
+
+      # Internet router: no auth middleware (Pocket ID handles its own auth)
+      - "traefik.http.routers.pocket-id.rule=Host(`pocket-id.desktop.madhur.co.in`)"
+      - "traefik.http.routers.pocket-id.entrypoints=websecure"
+      - "traefik.http.routers.pocket-id.tls.certresolver=letencrypt"
+      - "traefik.http.routers.pocket-id.service=pocket-id"
+      - "traefik.http.routers.pocket-id.priority=1"
+    networks:
+      - proxy-network
+    healthcheck:
+      test: "curl -f http://localhost:1411/healthz"
+      interval: 1m30s
+      timeout: 5s
+      retries: 2
+      start_period: 10s
+
+networks:
+  proxy-network:
+    external: true
