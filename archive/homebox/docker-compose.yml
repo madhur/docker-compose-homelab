@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.homebox.rule=Host(`homebox.desktop.madhur.co.in`)"
       - "traefik.http.routers.homebox.entrypoints=websecure"
       - "traefik.http.routers.homebox.tls.certresolver=letencrypt"
-      - "traefik.http.routers.homebox.middlewares=authentik@file"
+      - "traefik.http.routers.homebox.middlewares=authelia@file"
       - "traefik.http.routers.homebox.service=homebox"
       - "traefik.http.routers.homebox.priority=1"
 

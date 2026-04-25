@@ -25,7 +25,7 @@ services:
       - "traefik.http.routers.expenseowl.rule=Host(`expenseowl.desktop.madhur.co.in`)"
       - "traefik.http.routers.expenseowl.entrypoints=websecure"
       - "traefik.http.routers.expenseowl.tls.certresolver=letencrypt"
-      - "traefik.http.routers.expenseowl.middlewares=authentik@file"
+      - "traefik.http.routers.expenseowl.middlewares=authelia@file"
       - "traefik.http.routers.expenseowl.service=expenseowl"
       - "traefik.http.routers.expenseowl.priority=1"
 

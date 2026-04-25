@@ -30,7 +30,7 @@ services:
       - "traefik.http.routers.prefect.rule=Host(`prefect.desktop.madhur.co.in`)"
       - "traefik.http.routers.prefect.entrypoints=websecure"
       - "traefik.http.routers.prefect.tls.certresolver=letencrypt"
-      - "traefik.http.routers.prefect.middlewares=authentik@file"
+      - "traefik.http.routers.prefect.middlewares=authelia@file"
       - "traefik.http.routers.prefect.service=prefect"
       - "traefik.http.routers.prefect.priority=1"
 

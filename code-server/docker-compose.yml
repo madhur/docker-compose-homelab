@@ -32,7 +32,7 @@ services:
         - "traefik.http.routers.codeserver.rule=Host(`code.desktop.madhur.co.in`)"
         - "traefik.http.routers.codeserver.entrypoints=websecure"
         - "traefik.http.routers.codeserver.tls.certresolver=letencrypt"
-        - "traefik.http.routers.codeserver.middlewares=authentik@file"
+        - "traefik.http.routers.codeserver.middlewares=authelia@file"
         - "traefik.http.routers.codeserver.service=codeserver"
         - "traefik.http.routers.codeserver.priority=1"
 

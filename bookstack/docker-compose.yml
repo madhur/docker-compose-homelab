@@ -30,7 +30,7 @@ services:
       - "traefik.http.routers.bookstack.rule=Host(`bookstack.desktop.madhur.co.in`)"
       - "traefik.http.routers.bookstack.entrypoints=websecure"
       - "traefik.http.routers.bookstack.tls.certresolver=letencrypt"
-      - "traefik.http.routers.bookstack.middlewares=tinyauth@file"
+      - "traefik.http.routers.bookstack.middlewares=authelia@file"
       - "traefik.http.routers.bookstack.service=bookstack"
       - "traefik.http.routers.bookstack.priority=1"
     networks:

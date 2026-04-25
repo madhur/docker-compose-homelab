@@ -28,7 +28,7 @@ services:
       - "traefik.http.routers.ezbookkeeping.rule=Host(`ezbookkeeping.desktop.madhur.co.in`)"
       - "traefik.http.routers.ezbookkeeping.entrypoints=websecure"
       - "traefik.http.routers.ezbookkeeping.tls.certresolver=letencrypt"
-      - "traefik.http.routers.ezbookkeeping.middlewares=authentik@file"
+      - "traefik.http.routers.ezbookkeeping.middlewares=authelia@file"
       - "traefik.http.routers.ezbookkeeping.service=ezbookkeeping"
       - "traefik.http.routers.ezbookkeeping.priority=1"
 

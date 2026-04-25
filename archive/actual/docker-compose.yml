@@ -25,7 +25,7 @@ services:
       - "traefik.http.routers.actual.rule=Host(`actual.desktop.madhur.co.in`)"
       - "traefik.http.routers.actual.entrypoints=websecure"
       - "traefik.http.routers.actual.tls.certresolver=letencrypt"
-      - "traefik.http.routers.actual.middlewares=authentik@file"
+      - "traefik.http.routers.actual.middlewares=authelia@file"
       - "traefik.http.routers.actual.service=actual"
       - "traefik.http.routers.actual.priority=1"
 

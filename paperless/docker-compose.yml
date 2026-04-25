@@ -61,7 +61,7 @@ services:
       - "traefik.http.routers.paperless.rule=Host(`paperless.desktop.madhur.co.in`)"
       - "traefik.http.routers.paperless.entrypoints=websecure"
       - "traefik.http.routers.paperless.tls.certresolver=letencrypt"
-      - "traefik.http.routers.paperless.middlewares=authentik@file"
+      - "traefik.http.routers.paperless.middlewares=authelia@file"
       - "traefik.http.routers.paperless.service=paperless"
       - "traefik.http.routers.paperless.priority=1"
     networks:

@@ -26,7 +26,7 @@ services:
       - "traefik.http.routers.olivetin.rule=Host(`olivetin.desktop.madhur.co.in`)"
       - "traefik.http.routers.olivetin.entrypoints=websecure"
       - "traefik.http.routers.olivetin.tls.certresolver=letencrypt"
-      - "traefik.http.routers.olivetin.middlewares=authentik@file"
+      - "traefik.http.routers.olivetin.middlewares=authelia@file"
       - "traefik.http.routers.olivetin.service=olivetin"
       - "traefik.http.routers.olivetin.priority=1"
 

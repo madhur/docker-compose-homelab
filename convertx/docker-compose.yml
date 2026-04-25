@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.convertx.rule=Host(`convertx.desktop.madhur.co.in`)"
       - "traefik.http.routers.convertx.entrypoints=websecure"
       - "traefik.http.routers.convertx.tls.certresolver=letencrypt"
-      - "traefik.http.routers.convertx.middlewares=authentik@file"
+      - "traefik.http.routers.convertx.middlewares=authelia@file"
       - "traefik.http.routers.convertx.service=convertx"
       - "traefik.http.routers.convertx.priority=1"
 

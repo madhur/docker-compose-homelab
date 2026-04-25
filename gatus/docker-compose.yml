@@ -24,7 +24,7 @@ services:
       - "traefik.http.routers.gatus.rule=Host(`gatus.desktop.madhur.co.in`)"
       - "traefik.http.routers.gatus.entrypoints=websecure"
       - "traefik.http.routers.gatus.tls.certresolver=letencrypt"
-      - "traefik.http.routers.gatus.middlewares=authentik@file"
+      - "traefik.http.routers.gatus.middlewares=authelia@file"
       - "traefik.http.routers.gatus.service=gatus"
       - "traefik.http.routers.gatus.priority=1"
 

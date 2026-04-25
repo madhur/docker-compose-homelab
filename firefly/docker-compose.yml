@@ -31,7 +31,7 @@ services:
       - "traefik.http.routers.firefly.rule=Host(`firefly.desktop.madhur.co.in`)"
       - "traefik.http.routers.firefly.entrypoints=websecure"
       - "traefik.http.routers.firefly.tls.certresolver=letencrypt"
-      - "traefik.http.routers.firefly.middlewares=authentik@file"
+      - "traefik.http.routers.firefly.middlewares=authelia@file"
       - "traefik.http.routers.firefly.service=firefly"
       - "traefik.http.routers.firefly.priority=1"
 

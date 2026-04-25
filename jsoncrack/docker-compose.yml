@@ -23,7 +23,7 @@ services:
       - "traefik.http.routers.jc.rule=Host(`jc.desktop.madhur.co.in`)"
       - "traefik.http.routers.jc.entrypoints=websecure"
       - "traefik.http.routers.jc.tls.certresolver=letencrypt"
-      - "traefik.http.routers.jc.middlewares=authentik@file"
+      - "traefik.http.routers.jc.middlewares=authelia@file"
       - "traefik.http.routers.jc.service=jc"
       - "traefik.http.routers.jc.priority=1"
 

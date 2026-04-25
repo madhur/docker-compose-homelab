@@ -22,7 +22,7 @@ services:
       - "traefik.http.routers.hopp-backend.rule=Host(`hopp-backend.desktop.madhur.co.in`)"
       - "traefik.http.routers.hopp-backend.entrypoints=websecure"
       - "traefik.http.routers.hopp-backend.tls.certresolver=letencrypt"
-      - "traefik.http.routers.hopp-backend.middlewares=authentik@file"
+      - "traefik.http.routers.hopp-backend.middlewares=authelia@file"
       - "traefik.http.routers.hopp-backend.service=hopp-backend"
       - "traefik.http.routers.hopp-backend.priority=1"
     networks:
@@ -60,7 +60,7 @@ services:
       - "traefik.http.routers.hopp.rule=Host(`hopp.desktop.madhur.co.in`)"
       - "traefik.http.routers.hopp.entrypoints=websecure"
       - "traefik.http.routers.hopp.tls.certresolver=letencrypt"
-      - "traefik.http.routers.hopp.middlewares=authentik@file"
+      - "traefik.http.routers.hopp.middlewares=authelia@file"
       - "traefik.http.routers.hopp.service=hopp"
       - "traefik.http.routers.hopp.priority=1"
     networks:
@@ -88,7 +88,7 @@ services:
       - "traefik.http.routers.hopp-admin.rule=Host(`hopp-admin.desktop.madhur.co.in`)"
       - "traefik.http.routers.hopp-admin.entrypoints=websecure"
       - "traefik.http.routers.hopp-admin.tls.certresolver=letencrypt"
-      - "traefik.http.routers.hopp-admin.middlewares=authentik@file"
+      - "traefik.http.routers.hopp-admin.middlewares=authelia@file"
       - "traefik.http.routers.hopp-admin.service=hopp-admin"
       - "traefik.http.routers.hopp-admin.priority=1"
     networks:

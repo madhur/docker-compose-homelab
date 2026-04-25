@@ -1,0 +1,40 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    environment:
+      - TZ=Asia/Kolkata
+      - GENERIC_TIMEZONE=Asia/Kolkata
+      - N8N_HOST=n8n.desktop.madhur.co.in
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.desktop.madhur.co.in/
+      - N8N_EDITOR_BASE_URL=https://n8n.desktop.madhur.co.in/
+    volumes:
+      - ./data:/home/node/.n8n
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.n8n-local.rule=Host(`n8n.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.n8n-local.entrypoints=websecure"
+      - "traefik.http.routers.n8n-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.n8n-local.service=n8n"
+      - "traefik.http.routers.n8n-local.priority=10"
+
+      # Internet router: Authentik auth (lower priority)
+      - "traefik.http.routers.n8n.rule=Host(`n8n.desktop.madhur.co.in`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=letencrypt"
+      - "traefik.http.routers.n8n.middlewares=authelia@file"
+      - "traefik.http.routers.n8n.service=n8n"
+      - "traefik.http.routers.n8n.priority=1"
+
+networks:
+  proxy-network:
+    external: true

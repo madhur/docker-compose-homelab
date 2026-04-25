@@ -29,7 +29,7 @@ services:
       - "traefik.http.routers.homepage.rule=Host(`home.desktop.madhur.co.in`)"
       - "traefik.http.routers.homepage.entrypoints=websecure"
       - "traefik.http.routers.homepage.tls.certresolver=letencrypt"
-      - "traefik.http.routers.homepage.middlewares=authentik@file"
+      - "traefik.http.routers.homepage.middlewares=authelia@file"
       - "traefik.http.routers.homepage.service=homepage"
       - "traefik.http.routers.homepage.priority=1"
 

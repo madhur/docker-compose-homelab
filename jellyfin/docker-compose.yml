@@ -38,7 +38,7 @@ services:
       - "traefik.http.routers.jellyfin.rule=Host(`jf.desktop.madhur.co.in`)"
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls.certresolver=letencrypt"
-      - "traefik.http.routers.jellyfin.middlewares=authentik@file"
+      - "traefik.http.routers.jellyfin.middlewares=authelia@file"
       - "traefik.http.routers.jellyfin.service=jellyfin"
       - "traefik.http.routers.jellyfin.priority=1"
 

@@ -19,7 +19,7 @@ services:
       - "traefik.http.routers.bento.rule=Host(`bento.desktop.madhur.co.in`)"
       - "traefik.http.routers.bento.entrypoints=websecure"
       - "traefik.http.routers.bento.tls.certresolver=letencrypt"
-      - "traefik.http.routers.bento.middlewares=authentik@file"
+      - "traefik.http.routers.bento.middlewares=authelia@file"
       - "traefik.http.routers.bento.service=bento"
       - "traefik.http.routers.bento.priority=1"
     networks:

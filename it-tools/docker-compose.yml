@@ -21,7 +21,7 @@ services:
       - "traefik.http.routers.it-tools.rule=Host(`tools.desktop.madhur.co.in`)"
       - "traefik.http.routers.it-tools.entrypoints=websecure"
       - "traefik.http.routers.it-tools.tls.certresolver=letencrypt"
-      - "traefik.http.routers.it-tools.middlewares=authentik@file"
+      - "traefik.http.routers.it-tools.middlewares=authelia@file"
       - "traefik.http.routers.it-tools.service=it-tools"
       - "traefik.http.routers.it-tools.priority=1"
 

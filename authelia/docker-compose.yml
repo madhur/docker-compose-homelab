@@ -1,0 +1,27 @@
+services:
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Kolkata
+      X_AUTHELIA_CONFIG_FILTERS: template
+      AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: /secrets/jwt_secret
+      AUTHELIA_SESSION_SECRET_FILE: /secrets/session_secret
+      AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: /secrets/storage_encryption_key
+    volumes:
+      - ./config:/config
+      - ./secrets:/secrets:ro
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.authelia.rule=Host(`auth.desktop.madhur.co.in`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls.certresolver=letencrypt"
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+
+networks:
+  proxy-network:
+    external: true

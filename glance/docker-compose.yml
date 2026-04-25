@@ -25,7 +25,7 @@ services:
       - "traefik.http.routers.glance.rule=Host(`glance.desktop.madhur.co.in`)"
       - "traefik.http.routers.glance.entrypoints=websecure"
       - "traefik.http.routers.glance.tls.certresolver=letencrypt"
-      - "traefik.http.routers.glance.middlewares=authentik@file"
+      - "traefik.http.routers.glance.middlewares=authelia@file"
       - "traefik.http.routers.glance.service=glance"
       - "traefik.http.routers.glance.priority=1"
 

@@ -21,7 +21,7 @@ services:
       - "traefik.http.routers.super-productivity.rule=Host(`sp.desktop.madhur.co.in`)"
       - "traefik.http.routers.super-productivity.entrypoints=websecure"
       - "traefik.http.routers.super-productivity.tls.certresolver=letencrypt"
-      - "traefik.http.routers.super-productivity.middlewares=authentik@file"
+      - "traefik.http.routers.super-productivity.middlewares=authelia@file"
       - "traefik.http.routers.super-productivity.service=super-productivity"
       - "traefik.http.routers.super-productivity.priority=1"
 
@@ -57,7 +57,7 @@ services:
       - "traefik.http.routers.super-productivity-sync.rule=Host(`sp-sync.desktop.madhur.co.in`)"
       - "traefik.http.routers.super-productivity-sync.entrypoints=websecure"
       - "traefik.http.routers.super-productivity-sync.tls.certresolver=letencrypt"
-      - "traefik.http.routers.super-productivity-sync.middlewares=authentik@file"
+      - "traefik.http.routers.super-productivity-sync.middlewares=authelia@file"
       - "traefik.http.routers.super-productivity-sync.service=super-productivity-sync"
       - "traefik.http.routers.super-productivity-sync.priority=1"
 

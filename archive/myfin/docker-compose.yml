@@ -24,7 +24,7 @@ services:
       - "traefik.http.routers.myfin.rule=Host(`myfin.desktop.madhur.co.in`)"
       - "traefik.http.routers.myfin.entrypoints=websecure"
       - "traefik.http.routers.myfin.tls.certresolver=letencrypt"
-      - "traefik.http.routers.myfin.middlewares=authentik@file"
+      - "traefik.http.routers.myfin.middlewares=authelia@file"
       - "traefik.http.routers.myfin.service=myfin"
       - "traefik.http.routers.myfin.priority=1"
 

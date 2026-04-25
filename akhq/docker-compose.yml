@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.akhq.rule=Host(`akhq.desktop.madhur.co.in`)"
       - "traefik.http.routers.akhq.entrypoints=websecure"
       - "traefik.http.routers.akhq.tls.certresolver=letencrypt"
-      - "traefik.http.routers.akhq.middlewares=authentik@file"
+      - "traefik.http.routers.akhq.middlewares=authelia@file"
       - "traefik.http.routers.akhq.service=akhq"
       - "traefik.http.routers.akhq.priority=1"
     networks:

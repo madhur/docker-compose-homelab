@@ -35,7 +35,7 @@ services:
       - "traefik.http.routers.vikunja.rule=Host(`vikunja.desktop.madhur.co.in`)"
       - "traefik.http.routers.vikunja.entrypoints=websecure"
       - "traefik.http.routers.vikunja.tls.certresolver=letencrypt"
-      - "traefik.http.routers.vikunja.middlewares=authentik@file"
+      - "traefik.http.routers.vikunja.middlewares=authelia@file"
       - "traefik.http.routers.vikunja.service=vikunja"
       - "traefik.http.routers.vikunja.priority=1"
 

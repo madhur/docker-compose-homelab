@@ -26,7 +26,7 @@ services:
       - "traefik.http.routers.opengist.rule=Host(`og.desktop.madhur.co.in`)"
       - "traefik.http.routers.opengist.entrypoints=websecure"
       - "traefik.http.routers.opengist.tls.certresolver=letencrypt"
-      - "traefik.http.routers.opengist.middlewares=authentik@file"
+      - "traefik.http.routers.opengist.middlewares=authelia@file"
       - "traefik.http.routers.opengist.service=opengist"
       - "traefik.http.routers.opengist.priority=1"
 

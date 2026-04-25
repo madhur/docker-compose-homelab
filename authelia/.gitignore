@@ -1,0 +1,4 @@
+secrets/
+config/db.sqlite3
+config/db.sqlite3-*
+config/notifications.txt

@@ -32,7 +32,7 @@ services:
       - "traefik.http.routers.sterlingpdf.rule=Host(`pdf.desktop.madhur.co.in`)"
       - "traefik.http.routers.sterlingpdf.entrypoints=websecure"
       - "traefik.http.routers.sterlingpdf.tls.certresolver=letencrypt"
-      - "traefik.http.routers.sterlingpdf.middlewares=authentik@file"
+      - "traefik.http.routers.sterlingpdf.middlewares=authelia@file"
       - "traefik.http.routers.sterlingpdf.service=sterlingpdf"
       - "traefik.http.routers.sterlingpdf.priority=1"
 

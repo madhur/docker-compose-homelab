@@ -23,7 +23,7 @@ services:
       - "traefik.http.routers.memos.rule=Host(`memos.desktop.madhur.co.in`)"
       - "traefik.http.routers.memos.entrypoints=websecure"
       - "traefik.http.routers.memos.tls.certresolver=letencrypt"
-      - "traefik.http.routers.memos.middlewares=authentik@file"
+      - "traefik.http.routers.memos.middlewares=authelia@file"
       - "traefik.http.routers.memos.service=memos"
       - "traefik.http.routers.memos.priority=1"
 

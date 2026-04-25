@@ -30,7 +30,7 @@ services:
       - "traefik.http.routers.rednotebook.rule=Host(`rb.desktop.madhur.co.in`)"
       - "traefik.http.routers.rednotebook.entrypoints=websecure"
       - "traefik.http.routers.rednotebook.tls.certresolver=letencrypt"
-      - "traefik.http.routers.rednotebook.middlewares=authentik@file"
+      - "traefik.http.routers.rednotebook.middlewares=authelia@file"
       - "traefik.http.routers.rednotebook.service=rednotebook"
       - "traefik.http.routers.rednotebook.priority=1"
 
