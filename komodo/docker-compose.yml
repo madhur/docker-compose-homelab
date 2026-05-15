@@ -54,6 +54,7 @@ services:
       traefik.http.routers.komodo.priority: "1"
     networks:
       - proxy-network
+      - default
 
   periphery:
     image: ghcr.io/moghtech/komodo-periphery:${COMPOSE_KOMODO_IMAGE_TAG:-latest}

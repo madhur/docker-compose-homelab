@@ -1,0 +1,45 @@
+services:
+  planka:
+    image: ghcr.io/plankanban/planka:latest
+    container_name: planka
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=Asia/Kolkata
+      - BASE_URL=https://planka.desktop.madhur.co.in
+      - DATABASE_URL=postgresql://planka:${PLANKA_DB_PASSWORD}@host.docker.internal:5432/planka
+      - SECRET_KEY=${PLANKA_SECRET_KEY}
+      - DEFAULT_ADMIN_EMAIL=ahuja.madhur@gmail.com
+      - DEFAULT_ADMIN_PASSWORD=${PLANKA_ADMIN_PASSWORD}
+      - DEFAULT_ADMIN_NAME=Madhur Ahuja
+      - DEFAULT_ADMIN_USERNAME=madhur
+    volumes:
+      - ./data/user-avatars:/app/public/user-avatars
+      - ./data/project-background-images:/app/public/project-background-images
+      - ./data/attachments:/app/private/attachments
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.planka.loadbalancer.server.port=1337"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.planka-local.rule=Host(`planka.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.planka-local.entrypoints=websecure"
+      - "traefik.http.routers.planka-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.planka-local.service=planka"
+      - "traefik.http.routers.planka-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.planka.rule=Host(`planka.desktop.madhur.co.in`)"
+      - "traefik.http.routers.planka.entrypoints=websecure"
+      - "traefik.http.routers.planka.tls.certresolver=letencrypt"
+      - "traefik.http.routers.planka.middlewares=authelia@file"
+      - "traefik.http.routers.planka.service=planka"
+      - "traefik.http.routers.planka.priority=1"
+
+networks:
+  proxy-network:
+    external: true

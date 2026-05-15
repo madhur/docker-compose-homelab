@@ -1,0 +1,175 @@
+# Journiv — adapted from upstream compose to use host Postgres instead of
+# a bundled postgres container, and to expose `app` via Traefik (dual-router
+# pattern: LAN no-auth, internet Authelia forward-auth).
+# Upstream: https://github.com/journiv/journiv-app/blob/main/docker-compose.yml
+
+x-base-env: &base-env
+  REDIS_URL: redis://valkey:6379/0
+  CELERY_BROKER_URL: redis://valkey:6379/0
+  CELERY_RESULT_BACKEND: redis://valkey:6379/0
+  DB_DRIVER: postgres
+  POSTGRES_HOST: host.docker.internal
+
+x-celery-common: &celery-common
+  image: swalabtech/journiv-app:${APP_VERSION:-latest}
+  env_file: .env
+  volumes:
+    - ./data:/data
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  depends_on:
+    valkey:
+      condition: service_healthy
+  networks:
+    - backend
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"
+      max-file: "5"
+  deploy:
+    resources:
+      limits:
+        cpus: "1.0"
+        memory: 1g
+      reservations:
+        memory: 256m
+
+x-app-common: &app-common
+  image: swalabtech/journiv-app:${APP_VERSION:-latest}
+  env_file: .env
+  volumes:
+    - ./data:/data
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  depends_on:
+    valkey:
+      condition: service_healthy
+  networks:
+    - backend
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "50m"
+      max-file: "5"
+
+x-celery-healthcheck: &celery-healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 5
+  start_period: 40s
+
+services:
+  valkey:
+    image: valkey/valkey:9.0-alpine
+    container_name: journiv-valkey-cache
+    restart: unless-stopped
+    volumes:
+      - ./data/valkey:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  celery-worker:
+    <<: *celery-common
+    container_name: journiv-celery-worker
+    command: >
+      celery -A app.core.celery_app worker
+      --loglevel=info
+      --concurrency=${CELERY_WORKER_CONCURRENCY:-1}
+      --max-memory-per-child=${CELERY_WORKER_MAX_MEMORY_PER_CHILD_KB:-300000}
+      --max-tasks-per-child=${CELERY_WORKER_MAX_TASKS_PER_CHILD:-200}
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: celery-worker
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      <<: *celery-healthcheck
+
+  celery-beat:
+    <<: *celery-common
+    container_name: journiv-celery-beat
+    command: celery -A app.core.celery_app beat --loglevel=info --scheduler redbeat.RedBeatScheduler --pidfile=/tmp/celerybeat.pid
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: celery-beat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDBEAT_REDIS_URL: redis://valkey:6379/2
+    healthcheck:
+      <<: *celery-healthcheck
+
+  app:
+    <<: *app-common
+    container_name: journiv-app
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ENVIRONMENT: production
+      RATE_LIMIT_STORAGE_URI: redis://valkey:6379/1
+    networks:
+      - backend
+      - proxy-network
+    healthcheck:
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2g
+        reservations:
+          memory: 512m
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.journiv.loadbalancer.server.port=8000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.journiv-local.rule=Host(`journiv.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.journiv-local.entrypoints=websecure"
+      - "traefik.http.routers.journiv-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.journiv-local.service=journiv"
+      - "traefik.http.routers.journiv-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.journiv.rule=Host(`journiv.desktop.madhur.co.in`)"
+      - "traefik.http.routers.journiv.entrypoints=websecure"
+      - "traefik.http.routers.journiv.tls.certresolver=letencrypt"
+      - "traefik.http.routers.journiv.middlewares=authelia@file"
+      - "traefik.http.routers.journiv.service=journiv"
+      - "traefik.http.routers.journiv.priority=1"
+
+  admin-cli:
+    <<: *app-common
+    container_name: journiv-admin-cli
+    profiles: ["admin"]
+    command: ["sleep", "infinity"]
+    environment:
+      <<: *base-env
+      SERVICE_ROLE: admin-cli
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      disable: true
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+        reservations:
+          memory: 256m
+
+networks:
+  backend:
+    driver: bridge
+  proxy-network:
+    external: true
