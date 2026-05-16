@@ -7,6 +7,15 @@ services:
       - HBOX_LOG_LEVEL=info
       - HBOX_LOG_FORMAT=text
       - HBOX_WEB_MAX_UPLOAD_SIZE=10
+      # OIDC via Authelia (added 2026-05-16)
+      - HBOX_OIDC_ENABLED=true
+      - HBOX_OIDC_ISSUER_URL=https://auth.desktop.madhur.co.in
+      - HBOX_OIDC_CLIENT_ID=homebox
+      - HBOX_OIDC_CLIENT_SECRET=${HBOX_OIDC_CLIENT_SECRET}
+      - HBOX_OIDC_REDIRECT_URL=https://homebox.desktop.madhur.co.in/api/v1/users/login/oidc/callback
+      - HBOX_OIDC_PROVIDER_NAME=Authelia
+      - HBOX_OIDC_EMAIL_CLAIM=email
+      - HBOX_OIDC_NAME_CLAIM=name
     volumes:
       - ./data:/data
     networks:

@@ -8,6 +8,12 @@ services:
     #   - "2222:2222" # SSH port, can be removed if you don't use SSH
     volumes:
       - "./data:/opengist"
+    environment:
+      # OIDC via Authelia (added 2026-05-16)
+      - OG_OIDC_PROVIDER_NAME=Authelia
+      - OG_OIDC_DISCOVERY_URL=https://auth.desktop.madhur.co.in/.well-known/openid-configuration
+      - OG_OIDC_CLIENT_KEY=opengist
+      - OG_OIDC_SECRET=${OG_OIDC_SECRET}
     networks:
       - proxy-network
     labels:

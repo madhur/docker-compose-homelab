@@ -12,6 +12,17 @@ services:
       - DB_USERNAME=bookstack
       - DB_PASSWORD=supersecretpassword
       - DB_DATABASE=bookstackapp
+      # OIDC via Authelia (added 2026-05-16) — AUTO_INITIATE=false keeps the local login form available
+      - AUTH_METHOD=oidc
+      - AUTH_AUTO_INITIATE=false
+      - OIDC_NAME=Authelia
+      - OIDC_DISPLAY_NAME_CLAIMS=name
+      - OIDC_CLIENT_ID=bookstack
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_ISSUER=https://auth.desktop.madhur.co.in
+      - OIDC_ISSUER_DISCOVER=true
+      - OIDC_USER_TO_GROUPS=false
+      - OIDC_END_SESSION_ENDPOINT=true
     volumes:
       - ./bookstack_app_data:/config
     labels:
