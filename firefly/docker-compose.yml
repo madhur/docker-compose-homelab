@@ -27,7 +27,7 @@ services:
       - "traefik.http.routers.firefly-local.service=firefly"
       - "traefik.http.routers.firefly-local.priority=10"
 
-      # Internet router: Authentik auth (lower priority, catches everything else)
+      # Internet router: Authelia auth (lower priority, catches everything else)
       - "traefik.http.routers.firefly.rule=Host(`firefly.desktop.madhur.co.in`)"
       - "traefik.http.routers.firefly.entrypoints=websecure"
       - "traefik.http.routers.firefly.tls.certresolver=letencrypt"
