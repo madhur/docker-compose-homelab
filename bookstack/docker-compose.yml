@@ -23,6 +23,21 @@ services:
       - OIDC_ISSUER_DISCOVER=true
       - OIDC_USER_TO_GROUPS=false
       - OIDC_END_SESSION_ENDPOINT=true
+      # SES SMTP (shared with InvoiceShelf)
+      - MAIL_DRIVER=smtp
+      - MAIL_FROM=bookstack@madhur.co.in
+      - MAIL_FROM_NAME=BookStack
+      - MAIL_HOST=email-smtp.ap-south-1.amazonaws.com
+      - MAIL_PORT=587
+      - MAIL_ENCRYPTION=tls
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      # Redis cache + sessions on host Redis (DB 5)
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - REDIS_SERVERS=host.docker.internal:6379:5
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./bookstack_app_data:/config
     labels:

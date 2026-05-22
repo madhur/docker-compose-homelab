@@ -10,6 +10,9 @@ services:
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://n8n.desktop.madhur.co.in/
       - N8N_EDITOR_BASE_URL=https://n8n.desktop.madhur.co.in/
+      # Re-enable executeCommand (default n8n 2.0+ exclude list disables it).
+      # Keep localFileTrigger disabled — the only other entry in the default list.
+      - NODES_EXCLUDE=["n8n-nodes-base.localFileTrigger"]
     volumes:
       - ./data:/home/node/.n8n
     restart: unless-stopped
