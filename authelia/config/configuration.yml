@@ -1,0 +1,382 @@
+---
+theme: dark
+
+definitions:
+  network:
+    internal:
+      - 192.168.1.0/24
+      - 10.42.42.0/24
+
+
+server:
+  address: 'tcp://0.0.0.0:9091'
+
+log:
+  level: info
+
+identity_validation:
+  reset_password:
+    jwt_lifespan: '5 minutes'
+    jwt_algorithm: 'HS256'
+
+totp:
+  disable: false
+  issuer: auth.desktop.madhur.co.in
+
+webauthn:
+  disable: false
+  enable_passkey_login: true
+  display_name: 'Madhur Homelab'
+  attestation_conveyance_preference: indirect
+  timeout: '60 seconds'
+  selection_criteria:
+    attachment: ''
+    discoverability: required
+    user_verification: required
+
+authentication_backend:
+  password_reset:
+    disable: true
+  refresh_interval: '5 minutes'
+  file:
+    path: /config/users_database.yml
+    watch: true
+    password:
+      algorithm: argon2
+
+access_control:
+  default_policy: deny
+  rules:
+    - domain: 'auth.desktop.madhur.co.in'
+      policy: bypass
+    - domain: '*.desktop.madhur.co.in'
+      policy: one_factor
+      networks:
+        - 'internal'
+    - domain: '*.desktop.madhur.co.in'
+      policy: two_factor
+
+identity_providers:
+  oidc:
+    jwks:
+      - key_id: 'main'
+        algorithm: 'RS256'
+        use: 'sig'
+        key: |
+          {{- secret "/secrets/oidc_jwks_key.pem" | nindent 10 }}
+    lifespans:
+      access_token: '1 hour'
+      authorize_code: '1 minute'
+      id_token: '1 hour'
+      refresh_token: '90 minutes'
+    enable_client_debug_messages: false
+    authorization_policies:
+      internal_bypass:
+        default_policy: 'two_factor'
+        rules:
+          - policy: 'one_factor'
+            networks:
+              - 'internal'
+    claims_policies:
+      default:
+        id_token:
+          - 'email'
+          - 'email_verified'
+          - 'preferred_username'
+          - 'name'
+          - 'groups'
+    clients:
+      - client_id: 'komodo'
+        client_name: 'Komodo'
+        client_secret: '$pbkdf2-sha512$310000$w3aBgLMRiHWK2V1BZUG8jw$jT0lQBdqczufPFdoRTGYfYpqXhnNFcBrzWX9N/HNLXeekozgBKSxcDRaEJHQt26CJ381eeeqkOXJIdG5uENlOw'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        redirect_uris:
+          - 'https://komodo.desktop.madhur.co.in/auth/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'outline'
+        client_name: 'Outline'
+        client_secret: '$pbkdf2-sha512$310000$SHc4XRgjBAa2Qc6slTk1.Q$wos1BePScEERQwNsr7GdYjRRiinSPKkf5RXMXdkVOvRbRs21hLUmmVMvd.Zn2ksszFwCZQi.XYqViCRQ/Jd09g'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://outline.desktop.madhur.co.in/auth/oidc.callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_post'
+      - client_id: 'immich'
+        client_name: 'Immich'
+        client_secret: '$pbkdf2-sha512$310000$wbBgddB649JcfVowEjoGnw$28qQs4oS4rIi2S1krC3YYAlDuX4yMPihLyvYxo.Y8OZknd00k/t4b.zHXCcmkMrKfrQ6bg1BVKBtOLFjH57y9Q'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://immich.desktop.madhur.co.in/auth/login'
+          - 'app.immich:///oauth-callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_post'
+      - client_id: 'paperless'
+        client_name: 'Paperless-ngx'
+        client_secret: '$pbkdf2-sha512$310000$/zkVFfGmJBgYDkyxS/oKoA$.9zACQ2flv1yas2aaTDLFBthJShTwDU.fKut5eIJqqGwuu9J9wezBHJV59f0UmhvJIEii9qEYo2X2JohhQYt4A'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://paperless.desktop.madhur.co.in/accounts/oidc/authelia/login/callback/'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'bookstack'
+        client_name: 'BookStack'
+        client_secret: '$pbkdf2-sha512$310000$7blZ58.bUkjAjLaj2AMmxg$FAAHJhjXwZr.KPey6A9HS9N13CpjGk92hRMXtIIh1hDkYiVprqP5q5CnPoHd0XOJg7i/Ifer1Nrhm/z2oscdcA'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://bookstack.desktop.madhur.co.in/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'memos'
+        client_name: 'Memos'
+        client_secret: '$pbkdf2-sha512$310000$kFV7PB4VQWTaXm3i2bVQAQ$MJLaitDIY28L3Ix6lhgi0Rvvw5N7jv6GTHnlJBddISzAiL3JiHuONrliW1.hHY8HFPOMoeTF/1TNnX3AWSVe1A'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://memos.desktop.madhur.co.in/auth/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'linkwarden'
+        client_name: 'Linkwarden'
+        client_secret: '$pbkdf2-sha512$310000$SDnRx/Ryscq95NrW4uWUig$AqqD3d1W/EC7oWVdaOyo/T4XT3r2Umqth2wfX9PDMhueghjsb47G6AOSWnutqO6nmybaZMZ0unMBUvru.9KFtw'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://linkwarden.desktop.madhur.co.in/api/v1/auth/callback/authelia'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'planka'
+        client_name: 'Planka'
+        client_secret: '$pbkdf2-sha512$310000$msBRefG/EGFsFWm8cIrY7w$pPcBKn0u0wmtLr790P7dQxGo/791XksLKpg7.SLgsLSoAlfZDfs6LI/FghUNcGAM4ObnM9UX6Isi0MrmQtybGA'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://planka.desktop.madhur.co.in/oidc-callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+        response_modes:
+          - 'form_post'
+          - 'query'
+          - 'fragment'
+      - client_id: 'opengist'
+        client_name: 'OpenGist'
+        client_secret: '$pbkdf2-sha512$310000$1EpFc0KxWr8Jua9u823X7w$AjgVagrhaiC6Sx1w8AmyRjuVp2qToL/CPbouo8dl8RcECfQH.22BwL9uJ4nTWpYAJ.9/MPWkWBm558.M0zcJxg'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://og.desktop.madhur.co.in/oauth/openid-connect/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'homebox'
+        client_name: 'Homebox'
+        client_secret: '$pbkdf2-sha512$310000$8ROQ6GnQvFCIV.bpBDFnuA$NDY1emb4QG104WHDHVXGrRaw..ivpi0E5nIGrrr3yYZvmYqNXl0TNaB.D0v5Mpvt3xWF0UesZAuzAxwxGFsPJQ'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://homebox.desktop.madhur.co.in/api/v1/users/login/oidc/callback'
+          - 'http://homebox.desktop.madhur.co.in/api/v1/users/login/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'vaultwarden'
+        client_name: 'Vaultwarden'
+        client_secret: '$pbkdf2-sha512$310000$sNbRu/7SoYOemgO9rJP6nw$qaB4PJ0j2Cnw10lnmo7eeOujYzf8j0zb8oAGJHrrKnUDAY8EQwoMZacJrO9oEz7k.GdiLj48Y01wjKKTlVFSkg'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://vault.madhur.co.in/identity/connect/oidc-signin'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'dawarich'
+        client_name: 'Dawarich'
+        client_secret: '$pbkdf2-sha512$310000$qptJ/krWnLq5nPiOHJbMcA$POdTQcVhr25Q9qiu/tvf2wcegcepkrn2glCfn5mceIo06p7wZC5BzRMIwAyb6meAtvo6MTw6Q7egKGbgMmYFrg'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://dawarich.desktop.madhur.co.in/users/auth/openid_connect/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'journiv'
+        client_name: 'Journiv'
+        client_secret: '$pbkdf2-sha512$310000$/n/YjJEir9FXTf6XNKijvA$ijPPSN0ImTl3KD1QE6ePMyQIR1OU.ZA4CWHgSyaaX4NED7SV/jD9g9AZ0amhT5c7UXG.0EscGgQ5l.tOCqd5yQ'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://journiv.desktop.madhur.co.in/api/v1/auth/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'qui'
+        client_name: 'Qui'
+        client_secret: '$pbkdf2-sha512$310000$4eMwZ.KQIm9TuT1ldhZf2A$EQvACXlwfkl0V4ZGvC0DkYIv2gG2pPm0EUkQIwn23QDan1u1n6WN6V9v3oZw439h3vg6ZYC61JUhb3DwQARPwQ'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://torrent.desktop.madhur.co.in/api/auth/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
+      - client_id: 'termix'
+        client_name: 'Termix'
+        client_secret: '$pbkdf2-sha512$310000$yxenKNKOI.b3/Q2CEk78Kg$yHs/bTCSBk3Px6pWzA4cP/ht7Y86i9I.mnDL2kxAWV0Ac.UVPNleANGFCsTL80RN0U56z6sjY2GsQBln1iUmOA'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://termix.desktop.madhur.co.in/users/oidc/callback'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_post'
+      - client_id: 'nextcloud'
+        client_name: 'Nextcloud'
+        client_secret: '$pbkdf2-sha512$310000$ycGHvIglEXHdFlPIvpyCww$fTcZ4ZYO2YW2Vg23gDZHar0A4Lhr0w5mlGX4hb9E.d6MnPTi0JzLGToojG0cJqHHDPGCEbjjThdpAhX57cuLaA'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://nc.desktop.madhur.co.in/apps/user_oidc/code'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_post'
+
+session:
+  redis:
+    host: host.docker.internal
+    port: 6379
+  cookies:
+    - domain: 'desktop.madhur.co.in'
+      authelia_url: 'https://auth.desktop.madhur.co.in'
+      default_redirection_url: 'https://desktop.madhur.co.in'
+      name: authelia_session
+      same_site: lax
+      inactivity: '4 hours'
+      expiration: '24 hours'
+      remember_me: '24 hours'
+
+regulation:
+  max_retries: 5
+  find_time: '2 minutes'
+  ban_time: '10 minutes'
+
+storage:
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  disable_startup_check: false
+  filesystem:
+    filename: /config/notifications.txt
+
+ntp:
+  disable_startup_check: true
