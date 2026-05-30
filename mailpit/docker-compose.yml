@@ -1,0 +1,46 @@
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      # SMTP — exposed directly on the LAN so homelab apps/scripts can send mail.
+      # Traefik only proxies HTTP, so this can't go through the reverse proxy.
+      - "1025:1025"
+    environment:
+      - TZ=Asia/Kolkata
+      # Persist messages across restarts
+      - MP_DATABASE=/data/mailpit.db
+      # Automatic cleanup: keep at most the latest 500 messages and nothing older than 30 days
+      - MP_MAX_MESSAGES=500
+      - MP_MAX_AGE=720h
+      # LAN senders: accept mail without auth / without TLS
+      - MP_SMTP_AUTH_ACCEPT_ANY=true
+      - MP_SMTP_AUTH_ALLOW_INSECURE=true
+    volumes:
+      - ./data:/data
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.mailpit.loadbalancer.server.port=8025"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.mailpit-local.rule=Host(`mail.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.mailpit-local.entrypoints=websecure"
+      - "traefik.http.routers.mailpit-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mailpit-local.service=mailpit"
+      - "traefik.http.routers.mailpit-local.priority=10"
+
+      # Internet router: Authelia auth (lower priority, catches everything else)
+      - "traefik.http.routers.mailpit.rule=Host(`mail.desktop.madhur.co.in`)"
+      - "traefik.http.routers.mailpit.entrypoints=websecure"
+      - "traefik.http.routers.mailpit.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mailpit.middlewares=authelia@file"
+      - "traefik.http.routers.mailpit.service=mailpit"
+      - "traefik.http.routers.mailpit.priority=1"
+
+networks:
+  proxy-network:
+    external: true

@@ -4,6 +4,13 @@ api:
   debug: false
 #log:
 #  level: DEBUG  # Add this line
+accessLog:
+  filePath: "/logs/access.log"
+  format: json
+  bufferingSize: 0
+  fields:
+    headers:
+      defaultMode: drop
 entryPoints:
   web:
     address: ":80"

@@ -74,6 +74,7 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[Dockpeek](dockpeek/)** - Docker container monitoring and management | [GitHub](https://github.com/louislam/dockpeek)
 - **[Gatus](gatus/)** - Declarative service health monitoring | [GitHub](https://github.com/TwiN/gatus)
 - **[Graphite + StatsD + Grafana](graphite-statsd-grafana/)** - Metrics collection and visualization | [GitHub](https://github.com/grafana/grafana)
+- **[Mailpit](mailpit/)** - Local SMTP sink + web UI for homelab alert emails (auto-pruning) | [GitHub](https://github.com/axllent/mailpit)
 
 ### Location & Tracking
 - **[Dawarich](dawarich/)** - Self-hosted location history | [GitHub](https://github.com/Freika/dawarich)

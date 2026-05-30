@@ -22,6 +22,7 @@ services:
       - traefik:/certs
       - ./letsencrypt:/letsencrypt  # Add this line
       - ./dynamic:/dynamic:ro  # Dynamic config for local services
+      - ./logs:/logs  # access logs for fail2ban
 
 volumes:
   traefik:
