@@ -178,6 +178,7 @@ Most services use `.env` files for configuration. Key variables include:
 - **InvoiceShelf**: `https://invoiceshelf.desktop.madhur.co.in`
 
 ### Security & Development
+- **Remote Browser**: `https://browser.desktop.madhur.co.in`
 - **Code Server**: `https://code.desktop.madhur.co.in`
 - **n8n**: `https://n8n.desktop.madhur.co.in`
 - **Prefect**: `https://prefect.desktop.madhur.co.in`
@@ -205,7 +206,7 @@ Most services use `.env` files for configuration. Key variables include:
 - **Dawarich**: `https://dawarich.desktop.madhur.co.in`
 
 ### Local Services (Host Machine)
-- **Grafana**: `http://grafana.local.madhur.co.in`
+- **Grafana**: `http://grafana.local.madhur.co.in` (LAN) / `https://grafana.desktop.madhur.co.in` (WAN, HTTPS + Authelia)
 - **Prometheus**: `http://proxmox.local.madhur.co.in`
 - **ActivityWatch**: `http://activitywatch.local.madhur.co.in`
 - **WatchYourLAN**: `http://watchyourlan.local.madhur.co.in`

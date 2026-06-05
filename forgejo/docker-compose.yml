@@ -1,0 +1,41 @@
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:13
+    container_name: forgejo
+    environment:
+      - TZ=Asia/Kolkata
+      - USER_UID=1000
+      - USER_GID=1000
+      - FORGEJO__server__DOMAIN=forgejo.desktop.madhur.co.in
+      - FORGEJO__server__ROOT_URL=https://forgejo.desktop.madhur.co.in/
+      - FORGEJO__server__DISABLE_SSH=true
+    volumes:
+      - ./data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.forgejo.loadbalancer.server.port=3000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.forgejo-local.rule=Host(`forgejo.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.forgejo-local.entrypoints=websecure"
+      - "traefik.http.routers.forgejo-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.forgejo-local.service=forgejo"
+      - "traefik.http.routers.forgejo-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.forgejo.rule=Host(`forgejo.desktop.madhur.co.in`)"
+      - "traefik.http.routers.forgejo.entrypoints=websecure"
+      - "traefik.http.routers.forgejo.tls.certresolver=letencrypt"
+      - "traefik.http.routers.forgejo.middlewares=authelia@file"
+      - "traefik.http.routers.forgejo.service=forgejo"
+      - "traefik.http.routers.forgejo.priority=1"
+
+networks:
+  proxy-network:
+    external: true

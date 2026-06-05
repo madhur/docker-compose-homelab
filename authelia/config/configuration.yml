@@ -10,6 +10,12 @@ definitions:
 
 server:
   address: 'tcp://0.0.0.0:9091'
+  # fasthttp read buffer defaults to 4KB; forward-auth requests carry cookies +
+  # X-Forwarded-* headers + OIDC tokens that exceed it, causing 431 errors on
+  # protected apps (firefly/bookstack/akhq). See authelia/authelia#4086.
+  buffers:
+    read: 32768
+    write: 32768
 
 log:
   level: info

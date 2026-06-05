@@ -1,0 +1,53 @@
+services:
+  remotebrowser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: remotebrowser-brave:local
+    container_name: remotebrowser
+    security_opt:
+      - seccomp:unconfined
+    runtime: nvidia
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+      - TITLE=Remote Browser
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      # Force the "basic" cookie store (password "peanuts") so the migrated,
+      # re-encrypted cookies from the host Brave profile decrypt correctly.
+      # --force-dark-mode -> prefers-color-scheme: dark (sites use their dark theme).
+      # GPU flags -> use the passed-through RTX 3060 for rasterization (smoother scroll).
+      - CHROME_CLI=--password-store=basic --force-dark-mode --ignore-gpu-blocklist --enable-gpu-rasterization --enable-zero-copy --use-gl=angle --use-angle=gl-egl https://mail.google.com/
+    devices:
+      - /dev/dri:/dev/dri
+    volumes:
+      - ./config:/config
+    shm_size: "1gb"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.remotebrowser.loadbalancer.server.port=3000"
+
+      # LAN/VPN router: no Authelia (higher priority)
+      - "traefik.http.routers.remotebrowser-local.rule=Host(`browser.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.remotebrowser-local.entrypoints=websecure"
+      - "traefik.http.routers.remotebrowser-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.remotebrowser-local.service=remotebrowser"
+      - "traefik.http.routers.remotebrowser-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.remotebrowser.rule=Host(`browser.desktop.madhur.co.in`)"
+      - "traefik.http.routers.remotebrowser.entrypoints=websecure"
+      - "traefik.http.routers.remotebrowser.tls.certresolver=letencrypt"
+      - "traefik.http.routers.remotebrowser.middlewares=authelia@file"
+      - "traefik.http.routers.remotebrowser.service=remotebrowser"
+      - "traefik.http.routers.remotebrowser.priority=1"
+
+networks:
+  proxy-network:
+    external: true

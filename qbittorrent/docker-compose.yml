@@ -1,35 +1,4 @@
 services:
-  gluetun:
-    image: qmcgaw/gluetun
-    container_name: gluetun
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    environment:
-      VPN_SERVICE_PROVIDER: protonvpn
-      VPN_TYPE: wireguard
-      WIREGUARD_PRIVATE_KEY: ${WIREGUARD_PRIVATE_KEY}
-      SERVER_COUNTRIES: ${SERVER_COUNTRIES:-Netherlands}
-      VPN_PORT_FORWARDING: "on"
-      VPN_PORT_FORWARDING_PROVIDER: protonvpn
-      VPN_PORT_FORWARDING_STATUS_FILE: /gluetun/forwarded_port
-      VPN_PORT_FORWARDING_UP_COMMAND: '/bin/sh -c ''wget -4 -qO- --post-data="json={\"listen_port\":{{.Port}}}" "http://localhost:8080/api/v2/app/setPreferences" 2>/dev/null || true'''
-      TZ: Asia/Kolkata
-    volumes:
-      - ./gluetun:/gluetun
-    ports:
-      - 8080:8080 # qBittorrent WebUI
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8000/v1/portforward | grep -v '\"port\":0' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 30s
-    networks:
-      - proxy-network
-
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
@@ -41,13 +10,13 @@ services:
     volumes:
       - ./config:/config
       - /data/downloads:/downloads
-      - ./gluetun:/gluetun:ro
-      - ./custom-cont-init.d:/custom-cont-init.d:ro
+    ports:
+      - 8080:8080 # WebUI
+      - 6881:6881/tcp # BitTorrent
+      - 6881:6881/udp # BitTorrent
     restart: unless-stopped
-    network_mode: "service:gluetun"
-    depends_on:
-      gluetun:
-        condition: service_healthy
+    networks:
+      - proxy-network
 
   qui:
     image: ghcr.io/autobrr/qui:latest
@@ -58,6 +27,8 @@ services:
       - ./qui:/config
       - /data/downloads:/downloads
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - proxy-network
     labels:

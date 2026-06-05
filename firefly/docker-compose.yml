@@ -13,6 +13,7 @@ services:
     volumes:
       - ./upload:/var/www/html/storage/upload
       - ./database:/var/www/html/storage/database
+      - ./nginx-large-headers.conf:/etc/nginx/conf.d/zzz-large-headers.conf:ro
     networks:
       - proxy-network
     labels:

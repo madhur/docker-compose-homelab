@@ -1,0 +1,4 @@
+# Live browser profile — contains decryptable cookies, passwords, history. Never commit.
+config/
+# KasmVNC web-UI password
+.vnc_password

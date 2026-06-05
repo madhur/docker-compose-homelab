@@ -15,8 +15,7 @@ services:
         - "traefik.http.routers.outline.tls.certresolver=letencrypt"
         - "traefik.http.services.outline.loadbalancer.server.port=3000"
         - "traefik.docker.network=proxy-network"
-        - "traefik.http.routers.outline.middlewares=vpn-whitelist"
-        - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+        # Exposed to the internet directly; Outline's own Authelia OIDC login is the auth gate.
     networks:
       - proxy-network
     # depends_on:

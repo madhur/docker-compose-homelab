@@ -28,10 +28,14 @@ services:
       DB_PASS: wikijsrocks
       DB_NAME: wiki
     restart: unless-stopped
+    volumes:
+      # BookStack export for Local File System "Import Everything" (in-container path: /import-content)
+      - ./import-content:/import-content
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.wiki.rule=Host(`wiki.desktop.madhur.co.in`)"
-      - "traefik.http.routers.wiki.entrypoints=web"
+      - "traefik.http.routers.wiki.entrypoints=websecure"
+      - "traefik.http.routers.wiki.tls.certresolver=letencrypt"
       - "traefik.http.services.wiki.loadbalancer.server.port=3000"
       - "traefik.docker.network=proxy-network"
     networks:
