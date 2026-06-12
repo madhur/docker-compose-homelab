@@ -1,5 +1,10 @@
 # BookStack scripts
 
+> **Active digest:** `~/scripts/bookstack_digest.py` (the Python rewrite that the
+> `every24hours.timer` runs). Its config lives at `~/scripts/bookstack-digest.env`.
+> The `bookstack-digest.sh` shell script below is the **superseded** original, kept
+> for reference; the behaviour description still applies to the Python version.
+
 ## bookstack-digest.sh — daily "what changed" digest → Mailpit
 
 Lists BookStack **pages created or modified** in the last `WINDOW_HOURS` (default 24)
@@ -21,7 +26,7 @@ Registered in `~/scripts/every_24_hours.sh` (fired by the `every24hours.timer`, 
 alongside the other daily digests. ntfy only pings on failure.
 
 ### Config / secrets
-`bookstack-digest.env` (gitignored, `chmod 600`) holds the BookStack API token:
+`~/scripts/bookstack-digest.env` (gitignored, `chmod 600`) holds the BookStack API token:
 
 ```sh
 BS_TOKEN_ID=...
@@ -33,6 +38,6 @@ Generate the token in BookStack → profile → **API Tokens**.
 
 ### Manual run
 ```sh
-./bookstack-digest.sh                 # last 24h
-WINDOW_HOURS=720 ./bookstack-digest.sh  # last 30 days
+~/scripts/bookstack_digest.py                  # last 24h (active Python version)
+WINDOW_HOURS=720 ~/scripts/bookstack_digest.py # last 30 days
 ```

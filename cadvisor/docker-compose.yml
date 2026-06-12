@@ -4,7 +4,10 @@ services:
     container_name: 'cadvisor'
     command:
       - '-housekeeping_interval=30s'
+      - '-max_housekeeping_interval=60s'
       - '-docker_only=true'
+      - '-store_container_labels=false'
+      - '-disable_metrics=advtcp,cpu_topology,cpuset,disk,hugetlb,memory_numa,percpu,process,referenced_memory,resctrl,sched,tcp,udp'
     # ports:
     #   - '808:8080'
     volumes:
@@ -14,6 +17,11 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     networks:
       - proxy-network
 

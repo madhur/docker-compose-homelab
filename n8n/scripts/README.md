@@ -4,6 +4,8 @@ Three host scripts collect data and POST it to n8n. Each n8n workflow runs the J
 
 ## Files
 
+> The host scripts now live in `~/scripts/` (consolidated there for the cron/systemd-timer setup). The workflow JSON stays under `../workflows/`.
+
 | Script | Webhook path | Workflow JSON |
 |---|---|---|
 | `authelia-audit.sh` | `/webhook/authelia-audit` | `../workflows/authelia-audit.json` |
@@ -45,13 +47,13 @@ Timers fire daily at 08:00 / 08:05 / 08:10 (staggered).
 
 ```
 # Test the script end-to-end (will POST to webhook + send email)
-~/docker/n8n/scripts/authelia-audit.sh
+~/scripts/authelia-audit.sh
 
 # Test with custom window
-SINCE=7d ~/docker/n8n/scripts/pacman-summary.sh
+SINCE=7d ~/scripts/pacman-summary.sh
 
 # Override webhook URL (e.g. to httpbin.org/post for dry-run)
-WEBHOOK_URL=https://httpbin.org/post ~/docker/n8n/scripts/container-restart-digest.sh
+WEBHOOK_URL=https://httpbin.org/post ~/scripts/container-restart-digest.sh
 ```
 
 ## Why no `set -e`

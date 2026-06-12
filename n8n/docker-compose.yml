@@ -13,6 +13,13 @@ services:
       # Re-enable executeCommand (default n8n 2.0+ exclude list disables it).
       # Keep localFileTrigger disabled — the only other entry in the default list.
       - NODES_EXCLUDE=["n8n-nodes-base.localFileTrigger"]
+      # Store binary data inline (in-memory) rather than on the filesystem.
+      # Filesystem mode shares one `executions/temp/binary_data` dir across
+      # concurrent webhook executions; the first to finish does `rm -rf temp/`
+      # (file-system.manager.js rename()), wiping siblings' in-flight binaries.
+      # That dropped PDF attachments from concurrent gmail_reader dispatches
+      # ("Send Email" -> File not found). PDFs are small; memory mode is fine.
+      - N8N_DEFAULT_BINARY_DATA_MODE=default
     volumes:
       - ./data:/home/node/.n8n
     restart: unless-stopped
