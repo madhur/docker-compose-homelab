@@ -11,9 +11,9 @@ services:
       - TZ=Asia/Kolkata
       # Persist messages across restarts
       - MP_DATABASE=/data/mailpit.db
-      # Automatic cleanup: keep at most the latest 500 messages and nothing older than 30 days
-      - MP_MAX_MESSAGES=500
-      - MP_MAX_AGE=720h
+      # Automatic cleanup: keep at most the latest 10k messages and nothing older than 1 year
+      - MP_MAX_MESSAGES=10000
+      - MP_MAX_AGE=8760h
       # LAN senders: accept mail without auth / without TLS
       - MP_SMTP_AUTH_ACCEPT_ANY=true
       - MP_SMTP_AUTH_ALLOW_INSECURE=true

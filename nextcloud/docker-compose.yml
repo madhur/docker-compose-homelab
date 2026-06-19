@@ -17,11 +17,32 @@ services:
       - ./data:/var/www/html
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+
+      # Sync/DAV/API router: bypass Authelia so mobile/desktop clients,
+      # CalDAV/CardDAV, OCS API and public shares work over WAN.
+      # These paths are still protected by Nextcloud's own auth.
+      - "traefik.http.routers.nextcloud-dav.rule=Host(`nc.desktop.madhur.co.in`) && (PathPrefix(`/remote.php`) || PathPrefix(`/.well-known`) || PathPrefix(`/ocs`) || PathPrefix(`/ocm`) || PathPrefix(`/public.php`) || PathPrefix(`/s/`) || PathPrefix(`/status.php`))"
+      - "traefik.http.routers.nextcloud-dav.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud-dav.tls.certresolver=letencrypt"
+      - "traefik.http.routers.nextcloud-dav.service=nextcloud"
+      - "traefik.http.routers.nextcloud-dav.priority=100"
+
+      # LAN/VPN router: no auth (higher priority than the internet router)
+      - "traefik.http.routers.nextcloud-local.rule=Host(`nc.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.nextcloud-local.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.nextcloud-local.service=nextcloud"
+      - "traefik.http.routers.nextcloud-local.priority=10"
+
+      # Internet router: Authelia forward-auth for browser access (lowest priority)
       - "traefik.http.routers.nextcloud.rule=Host(`nc.desktop.madhur.co.in`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls.certresolver=letencrypt"
-      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
-      - "traefik.docker.network=proxy-network"
+      - "traefik.http.routers.nextcloud.middlewares=authelia@file"
+      - "traefik.http.routers.nextcloud.service=nextcloud"
+      - "traefik.http.routers.nextcloud.priority=1"
     networks:
       - proxy-network
 

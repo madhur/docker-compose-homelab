@@ -24,6 +24,7 @@ services:
       - /dev/dri:/dev/dri
     volumes:
       - ./config:/config
+      - /home/madhur/Downloads:/host/Downloads
     shm_size: "1gb"
     restart: unless-stopped
     networks:

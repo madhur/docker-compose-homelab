@@ -30,6 +30,16 @@ services:
       - "traefik.docker.network=proxy-network"
       - "traefik.http.services.n8n.loadbalancer.server.port=5678"
 
+      # Webhook/form router: no auth, reachable from anywhere (highest priority).
+      # n8n serves webhooks under /webhook*, /webhook-test*, /webhook-waiting*
+      # and forms under /form* — these must bypass Authelia so external
+      # callers (and the n8n editor's "Test" pings) can hit them.
+      - "traefik.http.routers.n8n-webhook.rule=Host(`n8n.desktop.madhur.co.in`) && (PathPrefix(`/webhook`) || PathPrefix(`/form`))"
+      - "traefik.http.routers.n8n-webhook.entrypoints=websecure"
+      - "traefik.http.routers.n8n-webhook.tls.certresolver=letencrypt"
+      - "traefik.http.routers.n8n-webhook.service=n8n"
+      - "traefik.http.routers.n8n-webhook.priority=20"
+
       # LAN/VPN router: no auth (higher priority)
       - "traefik.http.routers.n8n-local.rule=Host(`n8n.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
       - "traefik.http.routers.n8n-local.entrypoints=websecure"
@@ -37,7 +47,7 @@ services:
       - "traefik.http.routers.n8n-local.service=n8n"
       - "traefik.http.routers.n8n-local.priority=10"
 
-      # Internet router: Authentik auth (lower priority)
+      # Internet router: Authelia auth (lower priority)
       - "traefik.http.routers.n8n.rule=Host(`n8n.desktop.madhur.co.in`)"
       - "traefik.http.routers.n8n.entrypoints=websecure"
       - "traefik.http.routers.n8n.tls.certresolver=letencrypt"
