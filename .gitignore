@@ -30,3 +30,4 @@
 **/storage/
 **/logs/
 **/cache/invoiceninja/.env
+.superpowers/
