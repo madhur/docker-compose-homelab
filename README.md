@@ -32,6 +32,8 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[Journiv](journiv/)** - Private journal | [GitHub](https://github.com/journiv/journiv)
 - **[Planka](planka/)** - Kanban board for collaborative task management | [GitHub](https://github.com/plankanban/planka)
 - **[RedNotebook](rednotebook/)** - Daily journal | [GitHub](https://github.com/jendrikseipp/rednotebook)
+- **[TriliumNext](trilium/)** - Hierarchical note-taking app | [GitHub](https://github.com/TriliumNext/Notes)
+- **[Joplin Server](joplin/)** - Sync server for Joplin notes clients | [GitHub](https://github.com/laurent22/joplin)
 
 ### Media & Content Management
 - **[Immich](immich/)** - Self-hosted photo and video backup solution | [GitHub](https://github.com/immich-app/immich)
@@ -43,6 +45,7 @@ This repository contains Docker Compose configurations for various self-hosted s
 ### Finance
 - **[Firefly III](firefly/)** - Personal finance manager | [GitHub](https://github.com/firefly-iii/firefly-iii)
 - **[InvoiceShelf](invoiceshelf/)** - Invoice management | [GitHub](https://github.com/InvoiceShelf/InvoiceShelf)
+- **[Wealthfolio](wealthfolio/)** - Privacy-first investment portfolio tracker | [GitHub](https://github.com/wealthfolio/wealthfolio)
 
 ### Security & Authentication
 - **[Authelia](authelia/)** - Forward-auth identity provider | [GitHub](https://github.com/authelia/authelia)
@@ -176,6 +179,7 @@ Most services use `.env` files for configuration. Key variables include:
 ### Finance
 - **Firefly III**: `https://firefly.desktop.madhur.co.in`
 - **InvoiceShelf**: `https://invoiceshelf.desktop.madhur.co.in`
+- **Wealthfolio**: `https://wealthfolio.desktop.madhur.co.in`
 
 ### Security & Development
 - **Remote Browser**: `https://browser.desktop.madhur.co.in`

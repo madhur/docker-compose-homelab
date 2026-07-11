@@ -14,13 +14,23 @@ services:
         condition: service_healthy
     labels:
         - "traefik.enable=true"
+        - "traefik.docker.network=proxy-network"
+        - "traefik.http.services.changedetection.loadbalancer.server.port=5000"
+
+        # LAN/VPN router: no auth (higher priority)
+        - "traefik.http.routers.changedetection-local.rule=Host(`cd.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+        - "traefik.http.routers.changedetection-local.entrypoints=websecure"
+        - "traefik.http.routers.changedetection-local.tls.certresolver=letencrypt"
+        - "traefik.http.routers.changedetection-local.service=changedetection"
+        - "traefik.http.routers.changedetection-local.priority=10"
+
+        # Internet router: Authelia forward-auth (lower priority)
         - "traefik.http.routers.changedetection.rule=Host(`cd.desktop.madhur.co.in`)"
         - "traefik.http.routers.changedetection.entrypoints=websecure"
-        - "traefik.http.services.changedetection.loadbalancer.server.port=5000"
         - "traefik.http.routers.changedetection.tls.certresolver=letencrypt"
-        - "traefik.docker.network=proxy-network"
-        - "traefik.http.routers.changedetection.middlewares=vpn-whitelist"
-        - "traefik.http.middlewares.vpn-whitelist.ipwhitelist.sourcerange=10.42.42.0/24,192.168.1.0/24"
+        - "traefik.http.routers.changedetection.middlewares=authelia@file"
+        - "traefik.http.routers.changedetection.service=changedetection"
+        - "traefik.http.routers.changedetection.priority=1"
     networks:
       - proxy-network
 

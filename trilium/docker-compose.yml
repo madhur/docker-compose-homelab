@@ -1,0 +1,35 @@
+services:
+  trilium:
+    image: triliumnext/notes:latest
+    container_name: trilium
+    environment:
+      - TZ=Asia/Kolkata
+      - TRILIUM_DATA_DIR=/home/node/trilium-data
+    volumes:
+      - ./data:/home/node/trilium-data
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.trilium.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.trilium-local.rule=Host(`trilium.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.trilium-local.entrypoints=websecure"
+      - "traefik.http.routers.trilium-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.trilium-local.service=trilium"
+      - "traefik.http.routers.trilium-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.trilium.rule=Host(`trilium.desktop.madhur.co.in`)"
+      - "traefik.http.routers.trilium.entrypoints=websecure"
+      - "traefik.http.routers.trilium.tls.certresolver=letencrypt"
+      - "traefik.http.routers.trilium.middlewares=authelia@file"
+      - "traefik.http.routers.trilium.service=trilium"
+      - "traefik.http.routers.trilium.priority=1"
+
+networks:
+  proxy-network:
+    external: true

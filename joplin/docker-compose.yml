@@ -1,0 +1,44 @@
+services:
+  joplin:
+    image: joplin/server:latest
+    container_name: joplin
+    env_file:
+      - ./.env
+    environment:
+      - TZ=Asia/Kolkata
+      - APP_PORT=22300
+      - APP_BASE_URL=https://joplin.desktop.madhur.co.in
+      - DB_CLIENT=pg
+      - POSTGRES_HOST=host.docker.internal
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=joplin
+      - POSTGRES_USER=joplin
+      - MAILER_ENABLED=0
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.joplin.loadbalancer.server.port=22300"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.joplin-local.rule=Host(`joplin.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.joplin-local.entrypoints=websecure"
+      - "traefik.http.routers.joplin-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.joplin-local.service=joplin"
+      - "traefik.http.routers.joplin-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.joplin.rule=Host(`joplin.desktop.madhur.co.in`)"
+      - "traefik.http.routers.joplin.entrypoints=websecure"
+      - "traefik.http.routers.joplin.tls.certresolver=letencrypt"
+      - "traefik.http.routers.joplin.middlewares=authelia@file"
+      - "traefik.http.routers.joplin.service=joplin"
+      - "traefik.http.routers.joplin.priority=1"
+
+networks:
+  proxy-network:
+    external: true

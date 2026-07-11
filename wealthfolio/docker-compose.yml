@@ -1,0 +1,40 @@
+services:
+  wealthfolio:
+    image: wealthfolio/wealthfolio:3.6.1
+    container_name: wealthfolio
+    env_file:
+      - .env
+    environment:
+      - TZ=Asia/Kolkata
+      - WF_DB_PATH=/data/wealthfolio.db
+      - WF_LISTEN_ADDR=0.0.0.0:8088
+      - WF_AUTH_REQUIRED=false
+      - WF_CORS_ALLOW_ORIGINS=https://wealthfolio.desktop.madhur.co.in
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.wealthfolio.loadbalancer.server.port=8088"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.wealthfolio-local.rule=Host(`wealthfolio.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.wealthfolio-local.entrypoints=websecure"
+      - "traefik.http.routers.wealthfolio-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.wealthfolio-local.service=wealthfolio"
+      - "traefik.http.routers.wealthfolio-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.wealthfolio.rule=Host(`wealthfolio.desktop.madhur.co.in`)"
+      - "traefik.http.routers.wealthfolio.entrypoints=websecure"
+      - "traefik.http.routers.wealthfolio.tls.certresolver=letencrypt"
+      - "traefik.http.routers.wealthfolio.middlewares=authelia@file"
+      - "traefik.http.routers.wealthfolio.service=wealthfolio"
+      - "traefik.http.routers.wealthfolio.priority=1"
+
+networks:
+  proxy-network:
+    external: true
