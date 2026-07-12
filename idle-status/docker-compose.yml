@@ -1,0 +1,13 @@
+services:
+  idle-status:
+    image: nginx:alpine
+    container_name: idle-status
+    restart: unless-stopped
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    external: true
