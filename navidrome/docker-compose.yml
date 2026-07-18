@@ -1,0 +1,35 @@
+services:
+  navidrome:
+    image: deluan/navidrome:latest
+    container_name: navidrome
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./data:/data
+      - /home/madhur/media/music:/music:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.navidrome.loadbalancer.server.port=4533"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.navidrome-local.rule=Host(`navidrome.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.navidrome-local.entrypoints=websecure"
+      - "traefik.http.routers.navidrome-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.navidrome-local.service=navidrome"
+      - "traefik.http.routers.navidrome-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.navidrome.rule=Host(`navidrome.desktop.madhur.co.in`)"
+      - "traefik.http.routers.navidrome.entrypoints=websecure"
+      - "traefik.http.routers.navidrome.tls.certresolver=letencrypt"
+      - "traefik.http.routers.navidrome.middlewares=authelia@file"
+      - "traefik.http.routers.navidrome.service=navidrome"
+      - "traefik.http.routers.navidrome.priority=1"
+
+networks:
+  proxy-network:
+    external: true

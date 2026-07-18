@@ -25,27 +25,26 @@ This repository contains Docker Compose configurations for various self-hosted s
 
 ### Knowledge Management & Documentation
 - **[Bookstack](bookstack/)** - Simple, self-hosted wiki platform | [GitHub](https://github.com/BookStackApp/BookStack)
-- **[Docmost](docmost/)** - Collaborative documentation | [GitHub](https://github.com/docmost/docmost)
 - **[Outline](outline/)** - Team knowledge base | [GitHub](https://github.com/outline/outline)
-- **[Karakeep](karakeep/)** - Self-hosted bookmark and knowledge manager | [GitHub](https://github.com/karakeep-app/karakeep)
 - **[Linkwarden](linkwarden/)** - Self-hosted bookmark manager with archive capabilities | [GitHub](https://github.com/linkwarden/linkwarden)
-- **[Journiv](journiv/)** - Private journal | [GitHub](https://github.com/journiv/journiv)
 - **[Planka](planka/)** - Kanban board for collaborative task management | [GitHub](https://github.com/plankanban/planka)
 - **[RedNotebook](rednotebook/)** - Daily journal | [GitHub](https://github.com/jendrikseipp/rednotebook)
 - **[TriliumNext](trilium/)** - Hierarchical note-taking app | [GitHub](https://github.com/TriliumNext/Notes)
 - **[Joplin Server](joplin/)** - Sync server for Joplin notes clients | [GitHub](https://github.com/laurent22/joplin)
+- **[Memos](archive/memos/)** - Lightweight self-hosted note-taking | [GitHub](https://github.com/usememos/memos)
 
 ### Media & Content Management
 - **[Immich](immich/)** - Self-hosted photo and video backup solution | [GitHub](https://github.com/immich-app/immich)
 - **[Jellyfin](jellyfin/)** - Media server for movies, TV shows, and music | [GitHub](https://github.com/jellyfin/jellyfin)
 - **[Nextcloud](nextcloud/)** - Self-hosted cloud storage and collaboration | [GitHub](https://github.com/nextcloud/server)
 - **[Paperless-ngx](paperless/)** - Document management system | [GitHub](https://github.com/paperless-ngx/paperless-ngx)
-- **[qBittorrent](qbittorrent/)** - BitTorrent client | [GitHub](https://github.com/qbittorrent/qBittorrent)
+- **[qui](qbittorrent/)** - Fast qBittorrent web UI, replaces qBittorrent's own UI at the same domain | [GitHub](https://github.com/autobrr/qui)
 
 ### Finance
 - **[Firefly III](firefly/)** - Personal finance manager | [GitHub](https://github.com/firefly-iii/firefly-iii)
 - **[InvoiceShelf](invoiceshelf/)** - Invoice management | [GitHub](https://github.com/InvoiceShelf/InvoiceShelf)
 - **[Wealthfolio](wealthfolio/)** - Privacy-first investment portfolio tracker | [GitHub](https://github.com/wealthfolio/wealthfolio)
+- **[Ghostfolio](ghostfolio/)** - Wealth and portfolio tracker | [GitHub](https://github.com/ghostfolio/ghostfolio)
 
 ### Security & Authentication
 - **[Authelia](authelia/)** - Forward-auth identity provider | [GitHub](https://github.com/authelia/authelia)
@@ -54,7 +53,6 @@ This repository contains Docker Compose configurations for various self-hosted s
 ### Development & DevOps
 - **[Code Server](code-server/)** - VS Code in the browser | [GitHub](https://github.com/coder/code-server)
 - **[n8n](n8n/)** - Workflow automation platform | [GitHub](https://github.com/n8n-io/n8n)
-- **[Komodo](komodo/)** - Build and deployment automation platform | [GitHub](https://github.com/mbecker20/komodo)
 - **[Prefect](prefect/)** - Workflow orchestration platform | [GitHub](https://github.com/PrefectHQ/prefect)
 - **[Temporal](temporal/)** - Workflow orchestration platform | [GitHub](https://github.com/temporalio/temporal)
 - **[Bento](bento/)** - Stream processor for data pipelines | [GitHub](https://github.com/warpstreamlabs/bento)
@@ -86,15 +84,17 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[ConvertX](convertx/)** - File format converter | [GitHub](https://github.com/C4illin/ConvertX)
 - **[Glance](glance/)** - Self-hosted dashboard | [GitHub](https://github.com/glanceapp/glance)
 - **[Homepage](homepage/)** - Application dashboard | [GitHub](https://github.com/gethomepage/homepage)
-- **[Homebox](archive/homebox/)** - Home inventory management | [GitHub](https://github.com/sysadminsmedia/homebox)
+- **[Homebox](homebox/)** - Home inventory management | [GitHub](https://github.com/sysadminsmedia/homebox)
 - **[IT Tools](it-tools/)** - Collection of handy developer tools | [GitHub](https://github.com/CorentinTh/it-tools)
 - **[JSON Crack](jsoncrack/)** - JSON data visualization tool | [GitHub](https://github.com/AykutSarac/jsoncrack.com)
 - **[Networking Toolbox](networkingtoolbox/)** - Network diagnostic and testing tools
 - **[Ntfy](ntfy/)** - Push notifications service | [GitHub](https://github.com/binwiederhier/ntfy)
 - **[OliveTin](olivetin/)** - Web UI for running shell commands | [GitHub](https://github.com/OliveTin/OliveTin)
 - **[OpenGist](opengist/)** - Self-hosted pastebin powered by Git | [GitHub](https://github.com/thomiceli/opengist)
-- **[Radicale](radicale/)** - CalDAV/CardDAV server | [GitHub](https://github.com/Kozea/Radicale)
 - **[Dozzle](dozzle/)** - Docker container log viewer | [GitHub](https://github.com/amir20/dozzle)
+
+### Health & Fitness
+- **[SparkyFitness](sparkyfitness/)** - Fitness and nutrition tracker | [GitHub](https://github.com/CodeWithCJ/SparkyFitness)
 
 ## Quick Start
 
@@ -161,25 +161,26 @@ Most services use `.env` files for configuration. Key variables include:
 
 ### Knowledge Management
 - **Bookstack**: `https://bookstack.desktop.madhur.co.in`
-- **Docmost**: `https://docmost.desktop.madhur.co.in`
 - **Outline**: `https://outline.desktop.madhur.co.in`
-- **Karakeep**: `https://kk.desktop.madhur.co.in`
 - **Linkwarden**: `https://linkwarden.desktop.madhur.co.in`
-- **Journiv**: `https://journiv.desktop.madhur.co.in`
 - **Planka**: `https://planka.desktop.madhur.co.in`
 - **RedNotebook**: `https://rb.desktop.madhur.co.in`
+- **TriliumNext**: `https://trilium.desktop.madhur.co.in`
+- **Joplin Server**: `https://joplin.desktop.madhur.co.in`
+- **Memos**: `https://memos.desktop.madhur.co.in`
 
 ### Media & Content
 - **Immich**: `https://immich.desktop.madhur.co.in`
 - **Jellyfin**: `https://jf.desktop.madhur.co.in`
 - **Nextcloud**: `https://nc.desktop.madhur.co.in`
 - **Paperless**: `https://paperless.desktop.madhur.co.in`
-- **qBittorrent**: `https://torrent.desktop.madhur.co.in`
+- **qui (qBittorrent)**: `https://torrent.desktop.madhur.co.in`
 
 ### Finance
 - **Firefly III**: `https://firefly.desktop.madhur.co.in`
 - **InvoiceShelf**: `https://invoiceshelf.desktop.madhur.co.in`
 - **Wealthfolio**: `https://wealthfolio.desktop.madhur.co.in`
+- **Ghostfolio**: `https://ghostfolio.desktop.madhur.co.in`
 
 ### Security & Development
 - **Remote Browser**: `https://browser.desktop.madhur.co.in`
@@ -188,9 +189,9 @@ Most services use `.env` files for configuration. Key variables include:
 - **Prefect**: `https://prefect.desktop.madhur.co.in`
 - **Temporal UI**: `https://temporal-ui.desktop.madhur.co.in`
 - **Bento**: `https://bento.desktop.madhur.co.in`
-- **Komodo**: `https://komodo.desktop.madhur.co.in`
 - **Termix**: `https://termix.desktop.madhur.co.in`
 - **Request Baskets**: `https://req.desktop.madhur.co.in`
+- **AKHQ**: `https://akhq.desktop.madhur.co.in`
 - **Vaultwarden**: `https://vault.madhur.co.in`
 
 ### Utilities
@@ -204,10 +205,13 @@ Most services use `.env` files for configuration. Key variables include:
 - **Ntfy**: `https://ntfy.madhur.co.in`
 - **OliveTin**: `https://olivetin.desktop.madhur.co.in`
 - **OpenGist**: `https://og.desktop.madhur.co.in`
-- **Radicale**: `https://radiscale.desktop.madhur.co.in`
+- **Mailpit**: `https://mail.desktop.madhur.co.in`
 
 ### Location & Tracking
 - **Dawarich**: `https://dawarich.desktop.madhur.co.in`
+
+### Health & Fitness
+- **SparkyFitness**: `https://sparkyfitness.desktop.madhur.co.in`
 
 ### Local Services (Host Machine)
 - **Grafana**: `http://grafana.local.madhur.co.in` (LAN) / `https://grafana.desktop.madhur.co.in` (WAN, HTTPS + Authelia)
@@ -233,7 +237,7 @@ Most services use `.env` files for configuration. Key variables include:
 - PostgreSQL 18 runs on the host machine and is shared by multiple services; reachable as `local.madhur.co.in:5432` (DNS) or `host.docker.internal:5432` (from containers via `host-gateway`)
 - All services use domain pattern: `*.desktop.madhur.co.in` or `*.madhur.co.in`
 - Traefik automatically provisions and renews Let's Encrypt SSL certificates
-- Decommissioned services (Authentik, Booklore, Actual Budget, EzBookkeeping, ExpenseOwl, Myfin, Sterling PDF, Gitea, etc.) live under `archive/`
+- Decommissioned services (Authentik, Booklore, Docmost, Karakeep, Journiv, Komodo, Radicale, EzBookkeeping, ExpenseOwl, Myfin, Sterling PDF, Gitea, etc.) live under `archive/`
 
 ## Contributing
 
