@@ -1,6 +1,6 @@
 services:
   opengist:
-    image: ghcr.io/thomiceli/opengist:1.11
+    image: ghcr.io/thomiceli/opengist:1.15.0
     container_name: opengist
     restart: unless-stopped
     # ports:

@@ -1,0 +1,36 @@
+services:
+  forgejo:
+    image: codeberg.org/forgejo/forgejo:13
+    container_name: forgejo
+    environment:
+      - TZ=Asia/Kolkata
+      - USER_UID=1000
+      - USER_GID=1000
+      - FORGEJO__server__DOMAIN=forgejo.desktop.madhur.co.in
+      - FORGEJO__server__ROOT_URL=https://forgejo.desktop.madhur.co.in/
+      - FORGEJO__server__DISABLE_SSH=true
+      - FORGEJO__security__INSTALL_LOCK=true
+    volumes:
+      - ./data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.forgejo.loadbalancer.server.port=3000"
+
+      # Directly exposed, no Authelia — Forgejo handles its own auth.
+      # Needed so Woodpecker's server-to-server OAuth/webhook calls aren't
+      # intercepted by forward-auth (which would return a login redirect
+      # instead of a JSON/API response).
+      - "traefik.http.routers.forgejo.rule=Host(`forgejo.desktop.madhur.co.in`)"
+      - "traefik.http.routers.forgejo.entrypoints=websecure"
+      - "traefik.http.routers.forgejo.tls.certresolver=letencrypt"
+      - "traefik.http.routers.forgejo.service=forgejo"
+
+networks:
+  proxy-network:
+    external: true

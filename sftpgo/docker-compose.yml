@@ -1,0 +1,39 @@
+services:
+  sftpgo:
+    image: drakkan/sftpgo:latest
+    container_name: sftpgo
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./data:/srv/sftpgo/data
+      - ./backups:/srv/sftpgo/backups
+      - ./config:/var/lib/sftpgo
+      - ~/.aws:/var/lib/sftpgo/.aws:ro
+    ports:
+      - "2022:2022"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.sftpgo.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.sftpgo-local.rule=Host(`sftpgo.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.sftpgo-local.entrypoints=websecure"
+      - "traefik.http.routers.sftpgo-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.sftpgo-local.service=sftpgo"
+      - "traefik.http.routers.sftpgo-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.sftpgo.rule=Host(`sftpgo.desktop.madhur.co.in`)"
+      - "traefik.http.routers.sftpgo.entrypoints=websecure"
+      - "traefik.http.routers.sftpgo.tls.certresolver=letencrypt"
+      - "traefik.http.routers.sftpgo.middlewares=authelia@file"
+      - "traefik.http.routers.sftpgo.service=sftpgo"
+      - "traefik.http.routers.sftpgo.priority=1"
+
+networks:
+  proxy-network:
+    external: true
