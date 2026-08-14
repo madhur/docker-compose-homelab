@@ -16,6 +16,9 @@ services:
       - HBOX_OIDC_PROVIDER_NAME=Authelia
       - HBOX_OIDC_EMAIL_CLAIM=email
       - HBOX_OIDC_NAME_CLAIM=name
+      # Required since a homebox update made this mandatory; rotating
+      # invalidates issued API keys but not logins/sessions.
+      - HBOX_AUTH_API_KEY_PEPPER=${HBOX_AUTH_API_KEY_PEPPER}
     volumes:
       - ./data:/data
     networks:
