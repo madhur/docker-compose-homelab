@@ -10,6 +10,7 @@ services:
       - ./cache:/var/cache/ntfy
       - ./server.yml:/etc/ntfy/server.yml
       - ./firebase-key.json:/etc/ntfy/firebase-key.json:ro
+      - ./auth:/var/lib/ntfy
     # ports:
     #   - 8002:80
     restart: unless-stopped
