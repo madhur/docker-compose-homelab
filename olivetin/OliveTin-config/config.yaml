@@ -1,0 +1,615 @@
+saveLogs:
+  resultsDirectory: /var/log/olivetin/results/
+  outputDirectory: /var/log/olivetin/output/
+
+sectionNavigationStyle: topbar
+
+actions:
+
+  # ===== Teams Video Downloader =====
+  - title: "Download Teams Video"
+    icon: "&#127909;"
+    exec:
+      - ssh
+      - -F
+      - /config/ssh/easy.cfg
+      - madhur@local.madhur.co.in
+      - cd /home/madhur/Desktop/python && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/temporal_worker_wrapper.py download "{{ url }}" "{{ output }}" "{{ mode }}"
+    timeout: 120
+    arguments:
+      - name: url
+        title: "Teams/SharePoint Recording URL"
+        type: url
+        description: "The SharePoint recording URL from MS Teams"
+      - name: output
+        title: "Output Filename"
+        type: ascii_sentence
+        description: "Filename only (will be saved to /data/)"
+      - name: mode
+        title: "Download Mode"
+        type: ascii_identifier
+        default: "fast"
+        description: "fast (quick encoding), copy (no encoding), or quality (best quality)"
+        choices:
+          - value: "fast"
+            title: "Fast (quick encoding)"
+          - value: "copy"
+            title: "Copy (no re-encoding)"
+          - value: "quality"
+            title: "Quality (best quality)"
+
+  - title: "Download Teams Video (Prefect)"
+    id: download-teams-video-prefect
+    icon: "&#127909;"
+    exec:
+      - ssh
+      - -F
+      - /config/ssh/easy.cfg
+      - madhur@local.madhur.co.in
+      - cd /home/madhur/Desktop/python && PREFECT_API_URL=http://localhost:4200/api /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/prefect-worker.py download "{{ url }}" "{{ mode }}"
+    timeout: 30
+    arguments:
+      - name: url
+        title: "Teams/SharePoint Recording URL"
+        type: very_dangerous_raw_string
+        description: "The SharePoint recording URL from MS Teams"
+      - name: mode
+        title: "Download Mode"
+        type: ascii_identifier
+        default: "fast"
+        description: "fast (quick encoding), copy (no encoding), or quality (best quality)"
+        choices:
+          - value: "fast"
+            title: "Fast (quick encoding)"
+          - value: "copy"
+            title: "Copy (no re-encoding)"
+          - value: "quality"
+            title: "Quality (best quality)"
+
+  - title: "Download Teams Video (yt-dlp)"
+    id: download-teams-video-ytdlp
+    icon: "&#127909;"
+    exec:
+      - ssh
+      - -F
+      - /config/ssh/easy.cfg
+      - madhur@local.madhur.co.in
+      - cd /home/madhur/Desktop/python && PREFECT_API_URL=http://localhost:4200/api /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/prefect-ytdlp-worker.py download "{{ url }}"
+    timeout: 30
+    arguments:
+      - name: url
+        title: "Teams/SharePoint Recording URL"
+        type: very_dangerous_raw_string
+        description: "The SharePoint recording URL from MS Teams"
+
+  - title: "Shutdown System"
+    icon: "&#9211;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'sudo shutdown -h now'
+    timeout: 30
+
+  - title: "Enable Idle Shutdown"
+    icon: "&#128164;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'if systemctl --user is-active --quiet idle-shutdown.timer; then echo "Idle Shutdown already ENABLED"; else systemctl --user start idle-shutdown.timer && echo "Idle Shutdown Enabled"; fi'
+    timeout: 30
+
+  - title: "Disable Idle Shutdown"
+    icon: "&#9889;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'if systemctl --user is-active --quiet idle-shutdown.timer; then systemctl --user stop idle-shutdown.timer && echo "Idle Shutdown Disabled"; else echo "Idle Shutdown already DISABLED"; fi'
+    timeout: 30
+
+  - title: "Check Idle Shutdown Status"
+    icon: "&#128336;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'if systemctl --user is-active --quiet idle-shutdown.timer; then echo "Idle Shutdown is ENABLED, remaining=$(~/scripts/idle-remaining-plain.sh)"; else echo "Idle Shutdown is DISABLED"; fi'
+    timeout: 30
+
+  - title: "Extend Idle Shutdown"
+    icon: "&#9203;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '~/scripts/idle-extend.sh && echo "Idle timer extended" || echo "Extend failed - no logged-in ttys found"'
+    timeout: 30
+
+  # ===== Desktop Recording =====
+  - title: "Start Recording"
+    icon: "&#128308;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/start_recording.sh'
+    timeout: 30
+
+  - title: "Stop Recording"
+    icon: "&#9209;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/stop_recording.sh'
+    timeout: 120
+
+  # ===== Display & Layout =====
+  - title: "Fix Display Layout"
+    icon: "&#128421;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/fix_layout.sh" "Fix Display Layout" "olivetin"'
+    timeout: 30
+
+  - title: "Set Wallpaper"
+    icon: "&#128444;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/set_wallpaper.sh" "Set Wallpaper" "olivetin"'
+    timeout: 30
+
+  - title: "Take Screenshot"
+    icon: "&#128247;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/take-screenshot.sh'
+    timeout: 30
+
+  - title: "Screenshot to ntfy"
+    icon: "&#128241;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/screenshot-to-ntfy.sh'
+    timeout: 30
+
+  - title: "Toggle Screenshot Frequency"
+    icon: "&#9201;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/toggle-screenshot-frequency.sh'
+    timeout: 30
+
+  - title: "Check Screenshot Frequency"
+    icon: "&#128337;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/check-screenshot-frequency.sh'
+    timeout: 30
+
+  # ===== Cron Job Scripts (Run on-demand) =====
+  - title: "Run 3-Hourly Tasks"
+    icon: "&#128340;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/every_three_hours.sh" "Run 3-Hourly Tasks" "olivetin"'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Run all 3-hourly tasks? (Reward Recon Watch, Temporal Failed Workflows)"
+
+  - title: "Run 6-Hourly Tasks"
+    icon: "&#128343;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/every_six_hours.sh" "Run 6-Hourly Tasks" "olivetin"'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Run all 6-hourly tasks?"
+
+  - title: "Run Daily Tasks"
+    icon: "&#128197;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/every_24_hours.sh" "Run Daily Tasks" "olivetin"'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Run all daily tasks? (Screenshots cleanup, Email PDFs, Trash empty, Rednotebook backup, System update)"
+
+  - title: "Run Weekly Tasks"
+    icon: "&#128197;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/every_week.sh" "Run Weekly Tasks" "olivetin"'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Run all weekly tasks? (Dotfiles backup, Docker/Python sync, Disk monitor, Cache cleanup, Docker image cleanup)"
+
+  - title: "Run Monthly Tasks"
+    icon: "&#128197;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/every_month.sh" "Run Monthly Tasks" "olivetin"'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Run monthly tasks? (Blog build and publish)"
+
+  # ===== Daily Tasks (Individual) =====
+  - title: "Delete Old Screenshots"
+    icon: "&#128465;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "python /home/madhur/scripts/delete_old_screenshots.py /home/madhur/Screenshots/Timeline" "Delete Old Screenshots" "olivetin"'
+    timeout: 300
+
+  - title: "Fetch Email PDF"
+    icon: "&#128231;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/gmail_reader_stateful.py" "Fetch Email PDF" "olivetin"'
+    timeout: 600
+
+  - title: "Fetch Anjli Email PDF"
+    icon: "&#128231;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/gmail_reader_stateful.py -c anjli.yaml" "Fetch Anjli Email PDF" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Email Alerts to Firefly (Madhur)"
+    icon: "&#128181;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/transaction_uploader_actual.py --commit" "Sync Email Alerts to Firefly (Madhur)" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Email Alerts to Firefly (Anjli)"
+    icon: "&#128181;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/transaction_uploader_actual.py -c anjli.yaml --commit" "Sync Email Alerts to Firefly (Anjli)" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Bank SMS to Firefly (Madhur)"
+    icon: "&#128241;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/sms_uploader_firefly.py --commit" "Sync Bank SMS to Firefly (Madhur)" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Call Log to Calendar"
+    icon: "&#128222;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/call_log_uploader.py --commit" "Sync Call Log to Calendar" "olivetin"'
+    timeout: 600
+
+  - title: "Sync SMS to Calendar"
+    icon: "&#128172;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/email_reader && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/email_reader/sms_calendar_uploader.py --commit" "Sync SMS to Calendar" "olivetin"'
+    timeout: 600
+
+  - title: "Fetch ICICI Transactions (Anjli)"
+    icon: "&#128176;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/icici_reader && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python ./icici_login.py --profile anjli" "Fetch ICICI Transactions (Anjli)" "olivetin"'
+    timeout: 600
+
+  - title: "Fetch ICICI Transactions (Madhur)"
+    icon: "&#128176;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/icici_reader && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python ./icici_login.py --profile madhur" "Fetch ICICI Transactions (Madhur)" "olivetin"'
+    timeout: 600
+
+  - title: "Fetch Google Photos (Dad)"
+    icon: "&#128247;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/google_photos_fetcher && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python screenshot_homepage.py" "Fetch Google Photos (Dad)" "olivetin"'
+    timeout: 600
+
+  - title: "Fetch DesiTorrents Trending"
+    icon: "&#127909;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/desitorrents_login.py" "Fetch DesiTorrents Trending" "olivetin"'
+    timeout: 600
+
+  - title: "Run Family Inbox Digest (Madhur)"
+    icon: "&#128238;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/family_inbox && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/family_inbox/scrape_inbox.py -a Madhur" "Run Family Inbox Digest (Madhur)" "olivetin"'
+    timeout: 600
+
+  - title: "Run Family Inbox Digest (Anjli)"
+    icon: "&#128238;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/family_inbox && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/family_inbox/scrape_inbox.py -a Anjli" "Run Family Inbox Digest (Anjli)" "olivetin"'
+    timeout: 600
+
+  - title: "Run Family Inbox Digest (Om)"
+    icon: "&#128238;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/family_inbox && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/family_inbox/scrape_inbox.py -a Om" "Run Family Inbox Digest (Om)" "olivetin"'
+    timeout: 600
+
+  - title: "Empty Trash (7 days)"
+    icon: "&#128465;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "trash-empty 7 -f -v" "Empty Trash (7 days)" "olivetin"'
+    timeout: 300
+    confirm: true
+    confirmMessage: "Empty trash files older than 7 days?"
+
+  - title: "Rednotebook Backup"
+    icon: "&#128190;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/rednotebook-backup.sh" "Rednotebook Backup" "olivetin"'
+    timeout: 300
+
+  # ===== Weekly Tasks (Individual) =====
+  - title: "Backup & Push Dotfiles"
+    icon: "&#128190;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/gitpersonal/dotfiles && node_modules/gulp-cli/bin/gulp.js backup-and-push" "Backup & Push Dotfiles" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Docker Repo"
+    icon: "&#128260;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/git-automate.sh /home/madhur/docker" "Sync Docker Repo" "olivetin"'
+    timeout: 600
+
+  - title: "Sync Python Repo"
+    icon: "&#128260;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/git-automate.sh /home/madhur/Desktop/python" "Sync Python Repo" "olivetin"'
+    timeout: 600
+
+  - title: "Run Disk Monitor"
+    icon: "&#128200;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "sudo bash -c \"cd /home/madhur/Desktop/python/disk_monitor && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/disk_monitor/monitor_disk.py\"" "Run Disk Monitor" "olivetin"'
+    timeout: 600
+
+  - title: "Clean Pacman Cache"
+    icon: "&#129529;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/usr/bin/paccache -r -k 1" "Clean Pacman Cache" "olivetin"'
+    timeout: 300
+    confirm: true
+    confirmMessage: "Clean pacman cache (keep only 1 version)?"
+
+  - title: "Clean Docker Images"
+    icon: "&#129529;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "docker image prune -f" "Clean Docker Images" "olivetin"'
+    timeout: 300
+    confirm: true
+    confirmMessage: "Remove unused Docker images?"
+
+  # ===== Docker Management =====
+  - title: "List All Containers"
+    icon: "&#128230;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker ps --all --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"'
+    timeout: 30
+
+  - title: "View All Container Stats"
+    icon: "&#128202;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker stats --no-stream --all'
+    timeout: 30
+
+  # ===== Docker Update Management (Dockcheck) =====
+  - title: "Check for Docker Updates"
+    icon: "&#128269;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -n'
+    timeout: 300
+
+  - title: "Update All Docker Containers"
+    icon: "&#11014;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -a -b 7 -p'
+    timeout: 1800
+    confirm: true
+    confirmMessage: "Update all Docker containers? This will backup images for 7 days and prune old images."
+
+  - title: "List Dockcheck Backup Images"
+    icon: "&#128190;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -B'
+    timeout: 30
+
+  # ===== Docker Cleanup =====
+  - title: "Prune Dangling Images"
+    icon: "&#129529;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker image prune -f'
+    timeout: 300
+    confirm: true
+    confirmMessage: "Remove all dangling (untagged) Docker images?"
+
+  - title: "Clean Docker System (Full)"
+    icon: "&#128165;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker system prune -af --volumes'
+    timeout: 600
+    confirm: true
+    confirmMessage: "WARNING: This will remove all unused containers, networks, images, and volumes! Are you sure?"
+
+  - title: "Remove Dockcheck Backups (>7 days)"
+    icon: "&#128465;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker images --format "{{.Repository}} {{.Tag}}" | grep "^dockcheck" | while read repo tag; do backup_date="${tag%%_*}"; image_epoch=$(date -d "$backup_date" +%s 2>/dev/null || echo 0); current_epoch=$(date +%s); days_old=$(( (current_epoch - image_epoch) / 86400 )); if [ $days_old -gt 7 ]; then docker rmi "${repo}:${tag}"; fi; done'
+    timeout: 300
+    confirm: true
+    confirmMessage: "Remove Docker image backups older than 7 days?"
+
+  # ===== Weather Monitor =====
+  - title: "Fetch Weather Data"
+    icon: "&#127782;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/weather_monitor.py fetch" "Fetch Weather Data" "olivetin"'
+    timeout: 60
+
+  - title: "Generate Weather Graph"
+    icon: "&#127780;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'D={{ days }}; source /home/madhur/scripts/notify_wrapper.sh && DARGS=""; [ -n "$D" ] && DARGS="--days $D"; run_with_notification "cd /home/madhur/Desktop/python && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/weather_monitor.py graph $DARGS" "Generate Weather Graph" "olivetin"'
+    timeout: 120
+    arguments:
+      - name: days
+        title: "Number of Days"
+        type: ascii_identifier
+        default: ""
+        description: "Number of days to include in the graph (leave empty to use all available data)"
+
+  # ===== VNC Services =====
+  - title: "Restart VNC (Real Display :0)"
+    icon: "&#128444;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'systemctl restart x0vncserver.service && echo "x0vncserver restarted (port 5900)"'
+    timeout: 30
+
+  - title: "Restart VNC (Virtual Display :98)"
+    icon: "&#128444;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'systemctl --user restart x11vnc-xvfb.service && echo "x11vnc-xvfb restarted (port 5901)"'
+    timeout: 30
+
+  # ===== System & Connection =====
+  - title: "Test SSH Connection"
+    icon: "&#128279;"
+    shell: ssh -v -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "echo \"SSH connection successful\"" "Test SSH Connection" "olivetin"'
+    timeout: 30
+
+  - title: "Full System Update"
+    icon: "&#11015;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "sudo pacman -Syu --noconfirm" "Full System Update" "olivetin"'
+    timeout: 600
+    confirm: true
+    confirmMessage: "This will update your entire system. Continue?"
+
+  - title: "AWS Cost Digest"
+    icon: "&#128202;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/aws_cost_explorer/aws_cost_digest.py" "AWS Cost Digest" "olivetin"'
+    timeout: 300
+
+  - title: "Claude Code Usage Digest"
+    icon: "&#129302;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/ccusage_digest.py" "Claude Code Usage Digest" "olivetin"'
+    timeout: 300
+
+  - title: "Firefly Financial Digest"
+    icon: "&#128200;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/firefly_digest.py" "Firefly Financial Digest" "olivetin"'
+    timeout: 300
+
+  - title: "Loan Prepayment Digest"
+    icon: "&#127974;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/loan_prepayment_digest.py" "Loan Prepayment Digest" "olivetin"'
+    timeout: 300
+
+  - title: "Jira Cluster Monitor"
+    icon: "&#128203;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/jira_cluster_monitor_watch.py" "Jira Cluster Monitor → Mailpit" "olivetin"'
+    timeout: 300
+
+  # ===== linux-router: temporary lift/restore of the Mac block rules =====
+  - title: "Disable Mac Block"
+    icon: "&#128683;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "sudo /home/madhur/gitpersonal/linux-router/scripts/disable-block.sh" "Disable Mac Block" "olivetin"'
+    timeout: 30
+
+  - title: "Enable Mac Block"
+    icon: "&#128274;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "sudo /home/madhur/gitpersonal/linux-router/scripts/enable-block.sh" "Enable Mac Block" "olivetin"'
+    timeout: 30
+
+  # ===== BookStack wiki markdown sync =====
+  - title: "Pull BookStack Wiki (BookStack → Markdown)"
+    icon: "&#128214;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/docker/bookstack/scripts/sync-wiki-markdown.sh pull" "Pull BookStack Wiki" "olivetin"'
+    timeout: 300
+
+  - title: "Push BookStack Wiki (Markdown → BookStack)"
+    icon: "&#128228;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/docker/bookstack/scripts/sync-wiki-markdown.sh push" "Push BookStack Wiki" "olivetin"'
+    timeout: 300
+
+dashboards:
+
+  # ===== Default tab: most-used quick actions =====
+  - title: Home
+    contents:
+      - title: Quick Actions
+        type: fieldset
+        contents:
+          - title: "Enable Idle Shutdown"
+          - title: "Disable Idle Shutdown"
+          - title: "Extend Idle Shutdown"
+          - title: "Shutdown System"
+          - title: "Download Teams Video (yt-dlp)"
+      - title: Router
+        type: fieldset
+        contents:
+          - title: "Disable Mac Block"
+          - title: "Enable Mac Block"
+
+  # ===== Cron-style runs, both bulk and individual =====
+  - title: Scheduled Jobs
+    contents:
+      - title: Bulk Runs
+        type: fieldset
+        contents:
+          - title: "Run 3-Hourly Tasks"
+          - title: "Run 6-Hourly Tasks"
+          - title: "Run Daily Tasks"
+          - title: "Run Weekly Tasks"
+          - title: "Run Monthly Tasks"
+      - title: Daily Tasks
+        type: fieldset
+        contents:
+          - title: "Delete Old Screenshots"
+          - title: "Empty Trash (7 days)"
+          - title: "Rednotebook Backup"
+      - title: Weekly Tasks
+        type: fieldset
+        contents:
+          - title: "Backup & Push Dotfiles"
+          - title: "Sync Docker Repo"
+          - title: "Sync Python Repo"
+          - title: "Run Disk Monitor"
+          - title: "Clean Pacman Cache"
+          - title: "Clean Docker Images"
+
+  # ===== Email scraping, banking, family =====
+  - title: Email & Finance
+    contents:
+      - title: Email PDFs
+        type: fieldset
+        contents:
+          - title: "Fetch Email PDF"
+          - title: "Fetch Anjli Email PDF"
+      - title: Banking
+        type: fieldset
+        contents:
+          - title: "Fetch ICICI Transactions (Anjli)"
+          - title: "Fetch ICICI Transactions (Madhur)"
+          - title: "Sync Email Alerts to Firefly (Madhur)"
+          - title: "Sync Email Alerts to Firefly (Anjli)"
+          - title: "Sync Bank SMS to Firefly (Madhur)"
+      - title: Reports & Digests
+        type: fieldset
+        contents:
+          - title: "AWS Cost Digest"
+          - title: "Claude Code Usage Digest"
+          - title: "Firefly Financial Digest"
+          - title: "Loan Prepayment Digest"
+          - title: "Jira Cluster Monitor"
+      - title: Calendar Sync
+        type: fieldset
+        contents:
+          - title: "Sync Call Log to Calendar"
+          - title: "Sync SMS to Calendar"
+      - title: Family
+        type: fieldset
+        contents:
+          - title: "Fetch Google Photos (Dad)"
+          - title: "Run Family Inbox Digest (Madhur)"
+          - title: "Run Family Inbox Digest (Anjli)"
+          - title: "Run Family Inbox Digest (Om)"
+      - title: Media
+        type: fieldset
+        contents:
+          - title: "Fetch DesiTorrents Trending"
+
+  # ===== Docker inspect / updates / cleanup =====
+  - title: Docker
+    contents:
+      - title: Inspect
+        type: fieldset
+        contents:
+          - title: "List All Containers"
+          - title: "View All Container Stats"
+      - title: Updates (dockcheck)
+        type: fieldset
+        contents:
+          - title: "Check for Docker Updates"
+          - title: "Update All Docker Containers"
+          - title: "List Dockcheck Backup Images"
+      - title: Cleanup
+        type: fieldset
+        contents:
+          - title: "Prune Dangling Images"
+          - title: "Clean Docker Images"
+          - title: "Clean Docker System (Full)"
+          - title: "Remove Dockcheck Backups (>7 days)"
+
+  # ===== Everything for the workstation itself =====
+  - title: Desktop & System
+    contents:
+      - title: Recording
+        type: fieldset
+        contents:
+          - title: "Start Recording"
+          - title: "Stop Recording"
+      - title: Display & Screenshots
+        type: fieldset
+        contents:
+          - title: "Fix Display Layout"
+          - title: "Set Wallpaper"
+          - title: "Take Screenshot"
+          - title: "Screenshot to ntfy"
+          - title: "Toggle Screenshot Frequency"
+          - title: "Check Screenshot Frequency"
+          - title: "Fetch Weather Data"
+          - title: "Generate Weather Graph"
+      - title: VNC
+        type: fieldset
+        contents:
+          - title: "Restart VNC (Real Display :0)"
+          - title: "Restart VNC (Virtual Display :98)"
+      - title: Power
+        type: fieldset
+        contents:
+          - title: "Shutdown System"
+          - title: "Enable Idle Shutdown"
+          - title: "Disable Idle Shutdown"
+          - title: "Extend Idle Shutdown"
+          - title: "Check Idle Shutdown Status"
+      - title: Maintenance
+        type: fieldset
+        contents:
+          - title: "Test SSH Connection"
+          - title: "Full System Update"
+
+  # ===== Teams / SharePoint downloader variants =====
+  - title: Teams Downloads
+    contents:
+      - title: Teams Video
+        type: fieldset
+        contents:
+          - title: "Download Teams Video"
+          - title: "Download Teams Video (Prefect)"
+          - title: "Download Teams Video (yt-dlp)"
+
+  # ===== BookStack wiki markdown sync =====
+  - title: BookStack
+    contents:
+      - title: Wiki Markdown Sync
+        type: fieldset
+        contents:
+          - title: "Pull BookStack Wiki (BookStack → Markdown)"
+          - title: "Push BookStack Wiki (Markdown → BookStack)"
+
