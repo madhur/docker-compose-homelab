@@ -122,10 +122,17 @@ deleted/moved remotely) are left in place untouched and are not reported as
 an error — same "doesn't cover deletions" limitation the existing digest
 already accepts.
 
-Exit non-zero only on unrecoverable API failure (matching the cron wrapper's
-failure-notification contract). Conflicts are reported to stdout/stderr but
-do **not** fail the run — they're expected, recoverable state, not a script
-failure.
+**Revised during final review (2026-08-23):** the implementation exits
+non-zero when any conflict is detected, not only on unrecoverable API
+failure — this deliberately overrides the earlier draft of this section,
+which said conflicts should never fail the run. Reasoning: `pull` runs
+silently on success (`NOTIFY_ON_SUCCESS=false` in the cron wrapper), so a
+non-zero exit on conflict is the *only* nightly signal that a page needs
+manual attention — a silently-reported conflict would go unnoticed
+indefinitely. Conflicts are still printed to stderr with the affected
+filename, still leave both sides untouched, and are not a code defect —
+they're just no longer treated as a "quiet" outcome the way a plain
+unchanged-page skip is.
 
 ### `push` (local → BookStack; manual only, never scheduled)
 
@@ -148,8 +155,11 @@ it stays safe to automate. One line added to `~/scripts/every_24_hours.sh`:
 run_with_notification "/home/madhur/docker/bookstack/scripts/sync-wiki-markdown.sh pull" "BookStack Wiki Markdown Sync" "monitoring"
 ```
 
-Reuses the existing `notify_wrapper.sh`; ntfy fires only on non-zero exit
-(API failures), not on detected conflicts (those are printed, not fatal).
+Reuses the existing `notify_wrapper.sh`; ntfy fires on non-zero exit, which
+now includes both unrecoverable API failures AND detected conflicts (see
+the revision note under `pull` above) — a conflict left unresolved keeps
+alerting on every nightly run until the user resolves it. A clean run
+(nothing changed, nothing conflicting) stays silent.
 
 `push` is never scheduled — the user runs it explicitly after editing.
 

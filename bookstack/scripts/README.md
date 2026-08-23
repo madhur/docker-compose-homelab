@@ -52,8 +52,11 @@ for the full design.
 - **`pull`** — BookStack → local. Non-destructive: never overwrites a
   locally-edited file that hasn't been pushed yet. Conflicting edits (both
   sides changed since the last sync) are skipped and printed as warnings,
-  not overwritten. Safe to run unattended — scheduled nightly in
-  `~/scripts/every_24_hours.sh`.
+  not overwritten — but a detected conflict **does** exit non-zero, which
+  fires a high-priority ntfy alert via the cron wrapper every night the
+  conflict stays unresolved (a clean run stays silent). Safe to run
+  unattended in the sense that it never destroys data — scheduled nightly
+  in `~/scripts/every_24_hours.sh`.
 - **`push`** — local → BookStack. Manual only, never scheduled. Creates a
   new BookStack page for any `.md` file with no `page_id` frontmatter
   (only inside a folder that already matches an existing book — it will
