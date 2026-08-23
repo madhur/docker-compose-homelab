@@ -83,7 +83,7 @@ state_set() {
   local state_file="$1" page_id="$2" body_hash="$3" remote_updated_at="$4"
   [ -f "$state_file" ] || echo '{}' > "$state_file"
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(mktemp "$state_file.tmp.XXXXXX")"
   if ! jq --arg id "$page_id" --arg h "$body_hash" --arg u "$remote_updated_at" \
     '.[$id] = {body_hash: $h, remote_updated_at: $u}' "$state_file" > "$tmp"; then
     echo "state_set: jq failed updating $state_file for page $page_id — leaving state file untouched" >&2

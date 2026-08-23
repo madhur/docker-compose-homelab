@@ -55,7 +55,7 @@ cmd_pull() {
   offset=0
   : > "$PAGES_JSON"
   while :; do
-    chunk="$(api GET "/api/pages?count=500&offset=$offset&sort=priority")"
+    chunk="$(api GET "/api/pages?count=500&offset=$offset&sort=id")"
     n="$(echo "$chunk" | jq '.data | length')"
     [ "$n" -eq 0 ] && break
     echo "$chunk" | jq -c '.data[] | {id, name, slug, book_id, updated_at}' >> "$PAGES_JSON"
@@ -131,7 +131,7 @@ cmd_push() {
   done < <(api GET "/api/books?count=500" | jq -r '.data[] | [.id, .name, .slug] | @tsv')
 
   echo "==> Pushing local changes"
-  local created=0 updated=0 skipped=0 conflicts=0 unmapped=0
+  local created=0 updated=0 skipped=0 conflicts=0 unmapped=0 orphaned=0
   while IFS= read -r -d '' file; do
     folder="$(basename "$(dirname "$file")")"
     page_id="$(frontmatter_field "$file" page_id)"
@@ -177,7 +177,11 @@ cmd_push() {
       continue
     fi
 
-    remote="$(api GET "/api/pages/$page_id")"
+    if ! remote="$(api GET "/api/pages/$page_id")"; then
+      echo "SKIP (could not fetch BookStack page $page_id for $file — it may have been deleted upstream, or this was a transient API error; try again or delete the local file if it's gone for good): $file" >&2
+      orphaned=$((orphaned+1))
+      continue
+    fi
     remote_updated="$(echo "$remote" | jq -r '.updated_at')"
 
     if [ "$remote_updated" != "$synced_updated" ]; then
@@ -189,16 +193,22 @@ cmd_push() {
     payload="$(jq -n --arg name "$title" --arg md "$body" '{name:$name, markdown:$md}')"
     resp="$(api PUT "/api/pages/$page_id" "$payload")"
     new_updated="$(echo "$resp" | jq -r '.updated_at')"
+    new_slug="$(echo "$resp" | jq -r '.slug')"
     book_name="$(frontmatter_field "$file" book)"
-    url="$(frontmatter_field "$file" url)"
-    { build_frontmatter "$title" "$book_name" "$url" "$page_id" "$new_updated"; printf '%s' "$body"; } > "$file"
-    state_set "$STATE" "$page_id" "$(body_hash "$file")" "$new_updated"
-    echo "UPDATED: $file"
+    book_apislug="${BOOK_APISLUG_BY_FOLDER[$folder]:-}"
+    url="$BASE/books/$book_apislug/page/$new_slug"
+    new_file="$(dirname "$file")/$(slug "$title")-$page_id.md"
+    { build_frontmatter "$title" "$book_name" "$url" "$page_id" "$new_updated"; printf '%s' "$body"; } > "$new_file"
+    if [ "$new_file" != "$file" ]; then
+      rm -f "$file"
+    fi
+    state_set "$STATE" "$page_id" "$(body_hash "$new_file")" "$new_updated"
+    echo "UPDATED: $new_file"
     updated=$((updated+1))
   done < <(find "$OUT" -mindepth 2 -maxdepth 2 -name '*.md' -print0)
 
   echo
-  echo "Push done: $created created, $updated updated, $skipped unchanged, $conflicts conflicts, $unmapped unmapped"
+  echo "Push done: $created created, $updated updated, $skipped unchanged, $conflicts conflicts, $unmapped unmapped, $orphaned orphaned"
   [ "$conflicts" -eq 0 ] && [ "$unmapped" -eq 0 ]
 }
 
