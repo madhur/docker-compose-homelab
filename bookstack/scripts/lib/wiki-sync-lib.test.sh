@@ -48,8 +48,23 @@ cat > "$TMPDIR/no-fm.md" <<'EOF'
 Body content.
 EOF
 
+# Regression test: frontmatter closing fence NOT immediately followed by blank line,
+# but body has blank lines between paragraphs. The blank lines in the body must NOT be eaten.
+cat > "$TMPDIR/no-blank-after-fence.md" <<'EOF'
+---
+title: Test Page
+page_id: 42
+---
+# Heading
+
+First paragraph.
+
+Second paragraph.
+EOF
+
 assert_eq "strip_frontmatter: removes header" "$(printf '# Hello\n\nBody content.')" "$(strip_frontmatter "$TMPDIR/with-fm.md")"
 assert_eq "strip_frontmatter: no-op without header" "$(printf '# Hello\n\nBody content.')" "$(strip_frontmatter "$TMPDIR/no-fm.md")"
+assert_eq "strip_frontmatter: preserves body blanks when fence has no trailing blank" "$(printf '# Heading\n\nFirst paragraph.\n\nSecond paragraph.')" "$(strip_frontmatter "$TMPDIR/no-blank-after-fence.md")"
 assert_eq "body_hash: same body same hash regardless of frontmatter" "$(body_hash "$TMPDIR/with-fm.md")" "$(body_hash "$TMPDIR/no-fm.md")"
 assert_eq "frontmatter_field: title" "Test Page" "$(frontmatter_field "$TMPDIR/with-fm.md" title)"
 assert_eq "frontmatter_field: page_id" "42" "$(frontmatter_field "$TMPDIR/with-fm.md" page_id)"

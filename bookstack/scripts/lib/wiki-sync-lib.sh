@@ -16,9 +16,9 @@ strip_frontmatter() {
   local file="$1"
   awk '
     NR==1 && $0=="---" { infm=1; next }
-    infm && $0=="---" { infm=0; skipnext=1; next }
+    infm && $0=="---" { infm=0; close_line=NR; next }
     infm { next }
-    skipnext && $0=="" { skipnext=0; next }
+    NR==close_line+1 && $0=="" { next }
     { print }
   ' "$file"
 }
