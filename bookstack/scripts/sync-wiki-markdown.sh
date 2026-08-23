@@ -158,9 +158,13 @@ cmd_push() {
       new_slug="$(echo "$resp" | jq -r '.slug')"
       new_updated="$(echo "$resp" | jq -r '.updated_at')"
       url="$BASE/books/$book_apislug/page/$new_slug"
-      { build_frontmatter "$title" "$book_name" "$url" "$new_id" "$new_updated"; printf '%s' "$body"; } > "$file"
-      state_set "$STATE" "$new_id" "$(body_hash "$file")" "$new_updated"
-      echo "CREATED: $file -> page $new_id ($url)"
+      new_file="$(dirname "$file")/$(slug "$title")-$new_id.md"
+      { build_frontmatter "$title" "$book_name" "$url" "$new_id" "$new_updated"; printf '%s' "$body"; } > "$new_file"
+      if [ "$new_file" != "$file" ]; then
+        rm -f "$file"
+      fi
+      state_set "$STATE" "$new_id" "$(body_hash "$new_file")" "$new_updated"
+      echo "CREATED: $new_file -> page $new_id ($url)"
       created=$((created+1))
       continue
     fi
