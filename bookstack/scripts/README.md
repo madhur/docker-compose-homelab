@@ -41,3 +41,33 @@ Generate the token in BookStack → profile → **API Tokens**.
 ~/scripts/bookstack_digest.py                  # last 24h (active Python version)
 WINDOW_HOURS=720 ~/scripts/bookstack_digest.py # last 30 days
 ```
+
+## sync-wiki-markdown.sh — two-way BookStack ↔ Markdown sync
+
+Mirrors BookStack pages to `wiki-export/<Book>/<Page>-<id>.md` for agentic
+(grep/glob/read) search, and can push local Markdown edits back into
+BookStack. See `docs/superpowers/specs/2026-08-23-wiki-markdown-sync-design.md`
+for the full design.
+
+- **`pull`** — BookStack → local. Non-destructive: never overwrites a
+  locally-edited file that hasn't been pushed yet. Conflicting edits (both
+  sides changed since the last sync) are skipped and printed as warnings,
+  not overwritten. Safe to run unattended — scheduled nightly in
+  `~/scripts/every_24_hours.sh`.
+- **`push`** — local → BookStack. Manual only, never scheduled. Creates a
+  new BookStack page for any `.md` file with no `page_id` frontmatter
+  (only inside a folder that already matches an existing book — it will
+  never create a new book). Updates existing pages when the local body
+  hash has changed. Refuses (with a warning) if BookStack changed the same
+  page since the last sync — run `pull` first to resolve.
+- **State:** `wiki-export/.sync-state.json` tracks the last-synced content
+  hash and BookStack `updated_at` per page — this is what conflict
+  detection is based on. Gitignored, not wiki content.
+- **Also available as OliveTin buttons** (`BookStack` dashboard →
+  `Wiki Markdown Sync`) for one-click pull/push without SSHing in.
+
+### Manual run
+```sh
+./sync-wiki-markdown.sh pull   # refresh the local mirror
+./sync-wiki-markdown.sh push   # push local edits/new pages back to BookStack
+```
