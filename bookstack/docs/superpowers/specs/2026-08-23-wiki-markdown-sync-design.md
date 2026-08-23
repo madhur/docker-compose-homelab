@@ -1,6 +1,7 @@
 # BookStack ↔ Markdown Sync for Agentic Search
 
-**Date:** 2026-08-23 (revised same day: read-only export → two-way sync)
+**Date:** 2026-08-23 (revised same day: read-only export → two-way sync;
+further revised same day: add OliveTin buttons)
 **Status:** Approved
 
 ## Problem
@@ -134,6 +135,19 @@ Reuses the existing `notify_wrapper.sh`; ntfy fires only on non-zero exit
 (API failures), not on detected conflicts (those are printed, not fatal).
 
 `push` is never scheduled — the user runs it explicitly after editing.
+
+### OliveTin one-click buttons
+
+In addition to the CLI (`./scripts/sync-wiki-markdown.sh {pull|push}`),
+both subcommands get a button in OliveTin (`~/docker/olivetin`) under a new
+**BookStack → Wiki Markdown Sync** dashboard section, so pull/push can be
+triggered without SSHing into the host. Since OliveTin runs in a container
+with no host filesystem access, its actions SSH to the host and invoke the
+script there — the same `ssh -F /config/ssh/easy.cfg
+madhur@local.madhur.co.in '...'` + `notify_wrapper.sh`/`run_with_notification`
+pattern every other OliveTin action already uses (ntfy channel `"olivetin"`).
+`push` being a button click away doesn't change its manual-only nature — it's
+still never invoked by cron, only by an explicit click (CLI or OliveTin).
 
 ### Git tracking
 
