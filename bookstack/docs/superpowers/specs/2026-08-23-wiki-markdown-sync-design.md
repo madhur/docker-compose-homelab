@@ -41,6 +41,23 @@ BookStack.
 - Automatic conflict *resolution* — conflicts are detected and surfaced, not
   merged or resolved automatically.
 
+## Known limitation: matching is by filename, not `page_id`
+
+`pull` locates a page's local file by recomputing `<slug(title)>-<id>.md`
+from the API response and checking whether that path exists — it does not
+look up the file via `.sync-state.json`'s `page_id` key. Consequence: if a
+page's title is renamed directly in BookStack (outside this tool), the next
+`pull` computes a different filename, doesn't find the old file, and creates
+a fresh one under the new name — orphaning the old file from state tracking
+(same failure class as the file-naming bug fixed in Tasks 3/4's review; see
+`docs/superpowers/plans/2026-08-23-wiki-markdown-sync.md`'s Task 6 ledger
+entry). `push`'s create-page path avoids this by renaming its own output to
+match `pull`'s convention immediately, but a *remote* rename after the fact
+isn't covered. Not fixed now — flagged as a known gap, same tier as the
+chapter-hierarchy and deletion-propagation non-goals above. A future fix
+would have `pull` fall back to a `page_id`-keyed lookup via
+`.sync-state.json` before deciding a page is new.
+
 ## Design
 
 ### Script: `scripts/sync-wiki-markdown.sh {pull|push}`
