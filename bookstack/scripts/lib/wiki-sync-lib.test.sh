@@ -76,6 +76,17 @@ build_frontmatter "Test Page" "Test Book" "https://example.com/books/test/page/t
 assert_eq "build_frontmatter: round-trips page_id" "42" "$(frontmatter_field "$TMPDIR/built.md" page_id)"
 assert_eq "build_frontmatter: round-trips url" "https://example.com/books/test/page/test" "$(frontmatter_field "$TMPDIR/built.md" url)"
 
+# --- state_get_hash() / state_get_updated_at() / state_set() ---
+STATE="$TMPDIR/state.json"
+assert_eq "state_get_hash: empty on missing file" "" "$(state_get_hash "$STATE" 1)"
+assert_eq "state_get_updated_at: empty on missing file" "" "$(state_get_updated_at "$STATE" 1)"
+state_set "$STATE" "1" "abc123" "2026-08-23T00:00:00.000000Z"
+assert_eq "state_set/get_hash round-trip" "abc123" "$(state_get_hash "$STATE" 1)"
+assert_eq "state_set/get_updated_at round-trip" "2026-08-23T00:00:00.000000Z" "$(state_get_updated_at "$STATE" 1)"
+state_set "$STATE" "2" "def456" "2026-08-23T01:00:00.000000Z"
+assert_eq "state_set: preserves other entries" "abc123" "$(state_get_hash "$STATE" 1)"
+assert_eq "state_get_hash: empty for unknown page_id" "" "$(state_get_hash "$STATE" 999)"
+
 echo
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

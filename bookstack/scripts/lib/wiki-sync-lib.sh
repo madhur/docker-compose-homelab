@@ -63,3 +63,28 @@ updated_at: $updated_at
 
 EOF
 }
+
+# state_get_hash STATE_FILE PAGE_ID -> stdout
+state_get_hash() {
+  local state_file="$1" page_id="$2"
+  [ -f "$state_file" ] || { echo ""; return; }
+  jq -r --arg id "$page_id" '.[$id].body_hash // ""' "$state_file"
+}
+
+# state_get_updated_at STATE_FILE PAGE_ID -> stdout
+state_get_updated_at() {
+  local state_file="$1" page_id="$2"
+  [ -f "$state_file" ] || { echo ""; return; }
+  jq -r --arg id "$page_id" '.[$id].remote_updated_at // ""' "$state_file"
+}
+
+# state_set STATE_FILE PAGE_ID BODY_HASH REMOTE_UPDATED_AT
+state_set() {
+  local state_file="$1" page_id="$2" body_hash="$3" remote_updated_at="$4"
+  [ -f "$state_file" ] || echo '{}' > "$state_file"
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg id "$page_id" --arg h "$body_hash" --arg u "$remote_updated_at" \
+    '.[$id] = {body_hash: $h, remote_updated_at: $u}' "$state_file" > "$tmp"
+  mv "$tmp" "$state_file"
+}
