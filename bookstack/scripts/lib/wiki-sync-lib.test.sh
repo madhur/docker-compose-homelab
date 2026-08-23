@@ -87,6 +87,19 @@ state_set "$STATE" "2" "def456" "2026-08-23T01:00:00.000000Z"
 assert_eq "state_set: preserves other entries" "abc123" "$(state_get_hash "$STATE" 1)"
 assert_eq "state_get_hash: empty for unknown page_id" "" "$(state_get_hash "$STATE" 999)"
 
+# Regression test: state_set with corrupted state file should not silently clobber it
+STATE2="$TMPDIR/corrupted.json"
+echo "not json" > "$STATE2"
+ORIG_CONTENT="$(cat "$STATE2")"
+# Temporarily disable set -e to allow capture of non-zero exit
+set +e
+state_set "$STATE2" "1" "hash123" "2026-08-23T00:00:00.000000Z" 2>/dev/null
+EXIT_CODE=$?
+set -e
+AFTER_CONTENT="$(cat "$STATE2")"
+assert_eq "state_set: jq failure returns non-zero" "1" "$EXIT_CODE"
+assert_eq "state_set: jq failure leaves corrupted file untouched" "$ORIG_CONTENT" "$AFTER_CONTENT"
+
 echo
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
