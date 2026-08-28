@@ -425,6 +425,11 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/jira_cluster_monitor_watch.py" "Jira Cluster Monitor → Mailpit" "olivetin"'
     timeout: 300
 
+  - title: "Ryze Booster Bug Monitor"
+    icon: "&#128027;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/ryze_booster_monitor_watch.py" "Ryze Booster Bug Monitor → Mailpit" "olivetin"'
+    timeout: 300
+
   # ===== linux-router: temporary lift/restore of the Mac block rules =====
   - title: "Disable Mac Block"
     icon: "&#128683;"
@@ -517,6 +522,7 @@ dashboards:
           - title: "Firefly Financial Digest"
           - title: "Loan Prepayment Digest"
           - title: "Jira Cluster Monitor"
+          - title: "Ryze Booster Bug Monitor"
       - title: Calendar Sync
         type: fieldset
         contents:

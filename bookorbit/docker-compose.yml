@@ -1,0 +1,104 @@
+name: bookorbit
+
+services:
+  app:
+    container_name: bookorbit-app
+    image: ${APP_IMAGE?required}
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER?required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?required}
+      POSTGRES_DB: ${POSTGRES_DB?required}
+      JWT_SECRET: ${JWT_SECRET?required}
+      SETUP_BOOTSTRAP_TOKEN: ${SETUP_BOOTSTRAP_TOKEN?required}
+      APP_URL: ${APP_URL?required}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      NODE_MAX_OLD_SPACE_SIZE: ${NODE_MAX_OLD_SPACE_SIZE:-2048}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ${BOOKS_HOST_PATH:-./books}:/books
+      - ./data/app:/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const p=process.env.PORT||3000;fetch('http://127.0.0.1:'+p+'/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - default
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.bookorbit.loadbalancer.server.port=3000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.bookorbit-local.rule=Host(`bookorbit.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.bookorbit-local.entrypoints=websecure"
+      - "traefik.http.routers.bookorbit-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.bookorbit-local.service=bookorbit"
+      - "traefik.http.routers.bookorbit-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.bookorbit.rule=Host(`bookorbit.desktop.madhur.co.in`)"
+      - "traefik.http.routers.bookorbit.entrypoints=websecure"
+      - "traefik.http.routers.bookorbit.tls.certresolver=letencrypt"
+      - "traefik.http.routers.bookorbit.middlewares=authelia@file"
+      - "traefik.http.routers.bookorbit.service=bookorbit"
+      - "traefik.http.routers.bookorbit.priority=1"
+
+  postgres:
+    container_name: bookorbit-db
+    image: pgvector/pgvector:pg18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER?required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?required}
+      POSTGRES_DB: ${POSTGRES_DB?required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - default
+
+networks:
+  default:
+  proxy-network:
+    external: true

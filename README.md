@@ -8,19 +8,17 @@ This repository contains Docker Compose configurations for various self-hosted s
 
 - **Reverse Proxy**: Traefik with Let's Encrypt SSL certificates
 - **Network**: External `proxy-network` for service communication
-- **VPN**: WireGuard VPN (10.42.42.0/24) for secure remote access
 - **Authentication**: Authelia — forward-auth via Traefik for internet-facing services
 - **Database**: PostgreSQL 18 running on host machine (local.madhur.co.in:5432, also reachable via `host.docker.internal:host-gateway` from containers)
-- **Monitoring**: Gatus, Grafana, cAdvisor, Change Detection, Dockpeek for observability
+- **Monitoring**: Gatus, host Grafana, cAdvisor, Change Detection, Dockpeek for observability
 - **Notifications**: Ntfy for push notifications
-- **Storage**: Multiple database systems (MongoDB, Redis, Elasticsearch, DynamoDB) and persistent volumes
+- **Storage**: Host PostgreSQL and Redis, plus per-service persistent volumes
 
 ## Services
 
 ### Core Infrastructure
 - **[Traefik](traefik/)** - Reverse proxy with automatic SSL certificates | [GitHub](https://github.com/traefik/traefik)
 - **[Authelia](authelia/)** - Forward-auth identity provider | [GitHub](https://github.com/authelia/authelia)
-- **[WireGuard Easy](wg-easy/)** - VPN server for remote access | [GitHub](https://github.com/wg-easy/wg-easy)
 - **[Gatus](gatus/)** - Declarative service health monitoring | [GitHub](https://github.com/TwiN/gatus)
 
 ### Knowledge Management & Documentation
@@ -31,11 +29,11 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[RedNotebook](rednotebook/)** - Daily journal | [GitHub](https://github.com/jendrikseipp/rednotebook)
 - **[TriliumNext](trilium/)** - Hierarchical note-taking app | [GitHub](https://github.com/TriliumNext/Notes)
 - **[Joplin Server](joplin/)** - Sync server for Joplin notes clients | [GitHub](https://github.com/laurent22/joplin)
-- **[Memos](archive/memos/)** - Lightweight self-hosted note-taking | [GitHub](https://github.com/usememos/memos)
 
 ### Media & Content Management
 - **[Immich](immich/)** - Self-hosted photo and video backup solution | [GitHub](https://github.com/immich-app/immich)
 - **[Jellyfin](jellyfin/)** - Media server for movies, TV shows, and music | [GitHub](https://github.com/jellyfin/jellyfin)
+- **[Navidrome](navidrome/)** - Self-hosted music streaming server | [GitHub](https://github.com/navidrome/navidrome)
 - **[Nextcloud](nextcloud/)** - Self-hosted cloud storage and collaboration | [GitHub](https://github.com/nextcloud/server)
 - **[Paperless-ngx](paperless/)** - Document management system | [GitHub](https://github.com/paperless-ngx/paperless-ngx)
 - **[qui](qbittorrent/)** - Fast qBittorrent web UI, replaces qBittorrent's own UI at the same domain | [GitHub](https://github.com/autobrr/qui)
@@ -61,20 +59,11 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[Dockhand](dockhand/)** - Docker management UI
 - **[AKHQ](akhq/)** - Kafka UI | [GitHub](https://github.com/tchiotludo/akhq)
 
-### Databases & Storage
-- **[DynamoDB](dynamodb/)** - NoSQL database (local instance) | [AWS Docs](https://aws.amazon.com/dynamodb/)
-- **[Elasticsearch](elasticsearch/)** - Search and analytics engine | [GitHub](https://github.com/elastic/elasticsearch)
-- **[MongoDB](mongodb/)** - NoSQL document database | [GitHub](https://github.com/mongodb/mongo)
-- **[PostgreSQL](postgres/)** - Relational database
-- **[Redis Cluster](redis-cluster/)** - In-memory data store cluster | [GitHub](https://github.com/redis/redis)
-- **[Redis MQ Kafka](redis-mq-kafka/)** - Message queue with Kafka | [GitHub](https://github.com/apache/kafka)
-
 ### Monitoring & Analytics
 - **[cAdvisor](cadvisor/)** - Container resource monitoring | [GitHub](https://github.com/google/cadvisor)
 - **[Change Detection](changedetection/)** - Website change monitoring | [GitHub](https://github.com/dgtlmoon/changedetection.io)
 - **[Dockpeek](dockpeek/)** - Docker container monitoring and management | [GitHub](https://github.com/louislam/dockpeek)
 - **[Gatus](gatus/)** - Declarative service health monitoring | [GitHub](https://github.com/TwiN/gatus)
-- **[Graphite + StatsD + Grafana](graphite-statsd-grafana/)** - Metrics collection and visualization | [GitHub](https://github.com/grafana/grafana)
 - **[Mailpit](mailpit/)** - Local SMTP sink + web UI for homelab alert emails (auto-pruning) | [GitHub](https://github.com/axllent/mailpit)
 
 ### Location & Tracking
@@ -86,15 +75,19 @@ This repository contains Docker Compose configurations for various self-hosted s
 - **[Homepage](homepage/)** - Application dashboard | [GitHub](https://github.com/gethomepage/homepage)
 - **[Homebox](homebox/)** - Home inventory management | [GitHub](https://github.com/sysadminsmedia/homebox)
 - **[IT Tools](it-tools/)** - Collection of handy developer tools | [GitHub](https://github.com/CorentinTh/it-tools)
-- **[JSON Crack](jsoncrack/)** - JSON data visualization tool | [GitHub](https://github.com/AykutSarac/jsoncrack.com)
 - **[Networking Toolbox](networkingtoolbox/)** - Network diagnostic and testing tools
 - **[Ntfy](ntfy/)** - Push notifications service | [GitHub](https://github.com/binwiederhier/ntfy)
 - **[OliveTin](olivetin/)** - Web UI for running shell commands | [GitHub](https://github.com/OliveTin/OliveTin)
 - **[OpenGist](opengist/)** - Self-hosted pastebin powered by Git | [GitHub](https://github.com/thomiceli/opengist)
 - **[Dozzle](dozzle/)** - Docker container log viewer | [GitHub](https://github.com/amir20/dozzle)
+- **[SFTPGo](sftpgo/)** - Self-hosted SFTP/file transfer server | [GitHub](https://github.com/drakkan/sftpgo)
+- **[Idle Status](idle-status/)** - Internal-only status widget feeding Glance/Homepage dashboards (no public domain)
 
 ### Health & Fitness
 - **[SparkyFitness](sparkyfitness/)** - Fitness and nutrition tracker | [GitHub](https://github.com/CodeWithCJ/SparkyFitness)
+
+### Home Automation
+- **[Home Assistant](homeassistant/)** - Home automation platform (dockerized, host network, LAN-only) | [GitHub](https://github.com/home-assistant/core)
 
 ## Quick Start
 
@@ -132,8 +125,6 @@ Most services use `.env` files for configuration. Key variables include:
 
 ### Network Configuration
 - **proxy-network**: External network for service communication
-- **wg**: WireGuard VPN network (10.42.42.0/24)
-- **elastic**: Elasticsearch cluster network
 
 ### Security Features
 - Authelia forward-auth middleware (`authelia@file`) for internet-facing services
@@ -147,7 +138,7 @@ Most services use `.env` files for configuration. Key variables include:
 
 - **Gatus**: Declarative health checks for all services, alerts via Ntfy
 - **cAdvisor**: Container resource usage metrics
-- **Grafana**: Visualizes metrics from Graphite/StatsD
+- **Grafana**: Host-based dashboards, visualizes container/system metrics
 - **Change Detection**: Monitors websites for changes
 - **Ntfy**: Push notifications for system events
 
@@ -157,7 +148,6 @@ Most services use `.env` files for configuration. Key variables include:
 - **Authelia**: `https://auth.desktop.madhur.co.in`
 - **Gatus**: `https://gatus.desktop.madhur.co.in`
 - **Traefik Dashboard**: `https://traefik.desktop.madhur.co.in:9091`
-- **WireGuard**: `https://wg.desktop.madhur.co.in`
 
 ### Knowledge Management
 - **Bookstack**: `https://bookstack.desktop.madhur.co.in`
@@ -167,11 +157,11 @@ Most services use `.env` files for configuration. Key variables include:
 - **RedNotebook**: `https://rb.desktop.madhur.co.in`
 - **TriliumNext**: `https://trilium.desktop.madhur.co.in`
 - **Joplin Server**: `https://joplin.desktop.madhur.co.in`
-- **Memos**: `https://memos.desktop.madhur.co.in`
 
 ### Media & Content
 - **Immich**: `https://immich.desktop.madhur.co.in`
 - **Jellyfin**: `https://jf.desktop.madhur.co.in`
+- **Navidrome**: `https://navidrome.desktop.madhur.co.in`
 - **Nextcloud**: `https://nc.desktop.madhur.co.in`
 - **Paperless**: `https://paperless.desktop.madhur.co.in`
 - **qui (qBittorrent)**: `https://torrent.desktop.madhur.co.in`
@@ -201,11 +191,11 @@ Most services use `.env` files for configuration. Key variables include:
 - **Homepage**: `https://home.desktop.madhur.co.in`
 - **Homebox**: `https://homebox.desktop.madhur.co.in`
 - **IT Tools**: `https://tools.desktop.madhur.co.in`
-- **JSON Crack**: `https://jc.desktop.madhur.co.in`
 - **Ntfy**: `https://ntfy.madhur.co.in`
 - **OliveTin**: `https://olivetin.desktop.madhur.co.in`
 - **OpenGist**: `https://og.desktop.madhur.co.in`
 - **Mailpit**: `https://mail.desktop.madhur.co.in`
+- **SFTPGo**: `https://sftpgo.desktop.madhur.co.in`
 
 ### Location & Tracking
 - **Dawarich**: `https://dawarich.desktop.madhur.co.in`
@@ -213,13 +203,15 @@ Most services use `.env` files for configuration. Key variables include:
 ### Health & Fitness
 - **SparkyFitness**: `https://sparkyfitness.desktop.madhur.co.in`
 
+### Home Automation
+- **Home Assistant**: `http://homeassistant.local.madhur.co.in` (LAN only, host network)
+
 ### Local Services (Host Machine)
 - **Grafana**: `http://grafana.local.madhur.co.in` (LAN) / `https://grafana.desktop.madhur.co.in` (WAN, HTTPS + Authelia)
 - **Prometheus**: `http://proxmox.local.madhur.co.in`
 - **ActivityWatch**: `http://activitywatch.local.madhur.co.in`
 - **WatchYourLAN**: `http://watchyourlan.local.madhur.co.in`
 - **Ollama**: `http://ollama.local.madhur.co.in`
-- **HomeAssistant**: `http://homeassistant.local.madhur.co.in`
 
 ## Maintenance
 
@@ -237,7 +229,7 @@ Most services use `.env` files for configuration. Key variables include:
 - PostgreSQL 18 runs on the host machine and is shared by multiple services; reachable as `local.madhur.co.in:5432` (DNS) or `host.docker.internal:5432` (from containers via `host-gateway`)
 - All services use domain pattern: `*.desktop.madhur.co.in` or `*.madhur.co.in`
 - Traefik automatically provisions and renews Let's Encrypt SSL certificates
-- Decommissioned services (Authentik, Booklore, Docmost, Karakeep, Journiv, Komodo, Radicale, EzBookkeeping, ExpenseOwl, Myfin, Sterling PDF, Gitea, etc.) live under `archive/`
+- Decommissioned services (Authentik, Booklore, Docmost, Karakeep, Journiv, Komodo, Radicale, EzBookkeeping, ExpenseOwl, Myfin, Sterling PDF, Gitea, WireGuard Easy, Memos, etc.) live under `archive/`
 
 ## Contributing
 
