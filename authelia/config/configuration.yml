@@ -55,6 +55,12 @@ access_control:
   rules:
     - domain: 'auth.desktop.madhur.co.in'
       policy: bypass
+    # BookStack REST API: bypass so remote scripts can publish via API token
+    # auth (Token ID+Secret header) without an Authelia browser session.
+    - domain: 'bookstack.desktop.madhur.co.in'
+      resources:
+        - '^/api/.*'
+      policy: bypass
     - domain: '*.desktop.madhur.co.in'
       policy: one_factor
       networks:

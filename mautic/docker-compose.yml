@@ -1,0 +1,61 @@
+services:
+  mautic_db:
+    image: mariadb:11
+    container_name: mautic-db
+    environment:
+      - TZ=Asia/Kolkata
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=mautic
+      - MYSQL_USER=mautic
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ./db:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - mautic-network
+
+  mautic:
+    image: mautic/mautic:5-apache
+    container_name: mautic
+    depends_on:
+      - mautic_db
+    environment:
+      - TZ=Asia/Kolkata
+      - MAUTIC_DB_HOST=mautic_db
+      - MAUTIC_DB_NAME=mautic
+      - MAUTIC_DB_USER=mautic
+      - MAUTIC_DB_PASSWORD=${MYSQL_PASSWORD}
+      - MAUTIC_RUN_CRON_JOBS=true
+      - MAUTIC_TRUSTED_PROXIES=["172.16.0.0/12","192.168.0.0/16","10.0.0.0/8"]
+    volumes:
+      - ./data/config:/var/www/html/config
+      - ./data/logs:/var/www/html/var/logs
+      - ./data/media:/var/www/html/docroot/media
+    restart: unless-stopped
+    networks:
+      - proxy-network
+      - mautic-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.mautic.loadbalancer.server.port=80"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.mautic-local.rule=Host(`mautic.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.mautic-local.entrypoints=websecure"
+      - "traefik.http.routers.mautic-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mautic-local.service=mautic"
+      - "traefik.http.routers.mautic-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.mautic.rule=Host(`mautic.desktop.madhur.co.in`)"
+      - "traefik.http.routers.mautic.entrypoints=websecure"
+      - "traefik.http.routers.mautic.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mautic.middlewares=authelia@file"
+      - "traefik.http.routers.mautic.service=mautic"
+      - "traefik.http.routers.mautic.priority=1"
+
+networks:
+  proxy-network:
+    external: true
+  mautic-network:

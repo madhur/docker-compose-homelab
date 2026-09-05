@@ -1,0 +1,49 @@
+services:
+  listmonk:
+    image: listmonk/listmonk:latest
+    container_name: listmonk
+    command: [sh, -c, "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config '' && ./listmonk --config ''"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - TZ=Asia/Kolkata
+      - LISTMONK_app__address=0.0.0.0:9000
+      - LISTMONK_db__host=host.docker.internal
+      - LISTMONK_db__port=5432
+      - LISTMONK_db__user=listmonk
+      - LISTMONK_db__password=${LISTMONK_DB_PASSWORD}
+      - LISTMONK_db__database=listmonk
+      - LISTMONK_db__ssl_mode=disable
+      - LISTMONK_db__max_open=25
+      - LISTMONK_db__max_idle=25
+      - LISTMONK_db__max_lifetime=300s
+      - LISTMONK_ADMIN_USER=${LISTMONK_ADMIN_USER}
+      - LISTMONK_ADMIN_PASSWORD=${LISTMONK_ADMIN_PASSWORD}
+    volumes:
+      - ./uploads:/listmonk/uploads
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.listmonk.loadbalancer.server.port=9000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.listmonk-local.rule=Host(`listmonk.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.listmonk-local.entrypoints=websecure"
+      - "traefik.http.routers.listmonk-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.listmonk-local.service=listmonk"
+      - "traefik.http.routers.listmonk-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.listmonk.rule=Host(`listmonk.desktop.madhur.co.in`)"
+      - "traefik.http.routers.listmonk.entrypoints=websecure"
+      - "traefik.http.routers.listmonk.tls.certresolver=letencrypt"
+      - "traefik.http.routers.listmonk.middlewares=authelia@file"
+      - "traefik.http.routers.listmonk.service=listmonk"
+      - "traefik.http.routers.listmonk.priority=1"
+
+networks:
+  proxy-network:
+    external: true
