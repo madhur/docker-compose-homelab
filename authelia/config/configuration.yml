@@ -61,6 +61,17 @@ access_control:
       resources:
         - '^/api/.*'
       policy: bypass
+    # Jellyfin's own public bootstrap endpoint (server name/version/id only,
+    # no sensitive data - Jellyfin serves it unauthenticated by design so
+    # native/web clients can probe a server before login). ForwardAuth
+    # gating the whole domain caused a race right after login: the SPA's
+    # call to this endpoint could land before the Authelia session cookie
+    # settled, get a 401, and Jellyfin's client treated that as fatal
+    # instead of retrying -> endless loading spinner. (added 2026-09-10)
+    - domain: 'jf.desktop.madhur.co.in'
+      resources:
+        - '^/System/Info/Public$'
+      policy: bypass
     - domain: '*.desktop.madhur.co.in'
       policy: one_factor
       networks:
@@ -360,6 +371,35 @@ identity_providers:
           - 'email'
           - 'groups'
         userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_post'
+      - client_id: 'jellyfin'
+        client_name: 'Jellyfin'
+        client_secret: '$pbkdf2-sha512$310000$CWkmX.HNxVfs1FOjfO6LSQ$ZU90egEPxMKQJv/XHVxX1rtRZGVKWoIqbfPEQsGltmbZpAsnMWQPShO8ZH4BZtgXXmF.WtkrjZT.OhJnM3BlHA'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: true
+        pkce_challenge_method: 'S256'
+        redirect_uris:
+          # Must match the SSO-Auth plugin's saved provider key exactly.
+          # The plugin's "add provider" form doesn't actually let you name
+          # it "authelia" - it's always keyed "sso-auth" for a single OIDC
+          # provider entry (see config/data/plugins/configurations/SSO-Auth.xml
+          # on the jellyfin host). (fixed 2026-09-10)
+          - 'https://jf.desktop.madhur.co.in/sso/OID/redirect/sso-auth'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        # SSO-Auth's OIDC library (Duende.IdentityModel.OidcClient) sends
+        # the client secret via HTTP Basic auth for PAR but
+        # client_secret_post for the token exchange - an inconsistency
+        # in the plugin, not something one auth_method setting can
+        # satisfy both ways. Fix: PAR disabled plugin-side
+        # (DisablePushedAuthorization=true in SSO-Auth.xml) so only the
+        # token exchange's client_secret_post applies. (fixed 2026-09-10)
         token_endpoint_auth_method: 'client_secret_post'
 
 session:

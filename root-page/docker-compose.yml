@@ -1,0 +1,33 @@
+services:
+  root-page:
+    image: nginx:alpine
+    container_name: root-page
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.root-page.loadbalancer.server.port=80"
+
+      # HTTP :80 — served directly, no redirect to HTTPS
+      # (must outrank the global http-catchall redirect, priority 1)
+      - "traefik.http.routers.root-page-http.rule=Host(`desktop.madhur.co.in`)"
+      - "traefik.http.routers.root-page-http.entrypoints=web"
+      - "traefik.http.routers.root-page-http.service=root-page"
+      - "traefik.http.routers.root-page-http.priority=100"
+
+      # HTTPS :443 — public, no Authelia
+      - "traefik.http.routers.root-page-https.rule=Host(`desktop.madhur.co.in`)"
+      - "traefik.http.routers.root-page-https.entrypoints=websecure"
+      - "traefik.http.routers.root-page-https.tls.certresolver=letencrypt"
+      - "traefik.http.routers.root-page-https.service=root-page"
+      - "traefik.http.routers.root-page-https.priority=100"
+
+networks:
+  proxy-network:
+    external: true

@@ -7,65 +7,6 @@ sectionNavigationStyle: topbar
 actions:
 
   # ===== Teams Video Downloader =====
-  - title: "Download Teams Video"
-    icon: "&#127909;"
-    exec:
-      - ssh
-      - -F
-      - /config/ssh/easy.cfg
-      - madhur@local.madhur.co.in
-      - cd /home/madhur/Desktop/python && /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/temporal_worker_wrapper.py download "{{ url }}" "{{ output }}" "{{ mode }}"
-    timeout: 120
-    arguments:
-      - name: url
-        title: "Teams/SharePoint Recording URL"
-        type: url
-        description: "The SharePoint recording URL from MS Teams"
-      - name: output
-        title: "Output Filename"
-        type: ascii_sentence
-        description: "Filename only (will be saved to /data/)"
-      - name: mode
-        title: "Download Mode"
-        type: ascii_identifier
-        default: "fast"
-        description: "fast (quick encoding), copy (no encoding), or quality (best quality)"
-        choices:
-          - value: "fast"
-            title: "Fast (quick encoding)"
-          - value: "copy"
-            title: "Copy (no re-encoding)"
-          - value: "quality"
-            title: "Quality (best quality)"
-
-  - title: "Download Teams Video (Prefect)"
-    id: download-teams-video-prefect
-    icon: "&#127909;"
-    exec:
-      - ssh
-      - -F
-      - /config/ssh/easy.cfg
-      - madhur@local.madhur.co.in
-      - cd /home/madhur/Desktop/python && PREFECT_API_URL=http://localhost:4200/api /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/prefect-worker.py download "{{ url }}" "{{ mode }}"
-    timeout: 30
-    arguments:
-      - name: url
-        title: "Teams/SharePoint Recording URL"
-        type: very_dangerous_raw_string
-        description: "The SharePoint recording URL from MS Teams"
-      - name: mode
-        title: "Download Mode"
-        type: ascii_identifier
-        default: "fast"
-        description: "fast (quick encoding), copy (no encoding), or quality (best quality)"
-        choices:
-          - value: "fast"
-            title: "Fast (quick encoding)"
-          - value: "copy"
-            title: "Copy (no re-encoding)"
-          - value: "quality"
-            title: "Quality (best quality)"
-
   - title: "Download Teams Video (yt-dlp)"
     id: download-teams-video-ytdlp
     icon: "&#127909;"
@@ -100,11 +41,6 @@ actions:
   - title: "Check Idle Shutdown Status"
     icon: "&#128336;"
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'if systemctl --user is-active --quiet idle-shutdown.timer; then echo "Idle Shutdown is ENABLED, remaining=$(~/scripts/idle-remaining-plain.sh)"; else echo "Idle Shutdown is DISABLED"; fi'
-    timeout: 30
-
-  - title: "Extend Idle Shutdown"
-    icon: "&#9203;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '~/scripts/idle-extend.sh && echo "Idle timer extended" || echo "Extend failed - no logged-in ttys found"'
     timeout: 30
 
   # ===== Desktop Recording =====
@@ -308,35 +244,6 @@ actions:
     confirm: true
     confirmMessage: "Remove unused Docker images?"
 
-  # ===== Docker Management =====
-  - title: "List All Containers"
-    icon: "&#128230;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker ps --all --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"'
-    timeout: 30
-
-  - title: "View All Container Stats"
-    icon: "&#128202;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'docker stats --no-stream --all'
-    timeout: 30
-
-  # ===== Docker Update Management (Dockcheck) =====
-  - title: "Check for Docker Updates"
-    icon: "&#128269;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -n'
-    timeout: 300
-
-  - title: "Update All Docker Containers"
-    icon: "&#11014;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -a -b 7 -p'
-    timeout: 1800
-    confirm: true
-    confirmMessage: "Update all Docker containers? This will backup images for 7 days and prune old images."
-
-  - title: "List Dockcheck Backup Images"
-    icon: "&#128190;"
-    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/.local/bin/dockcheck.sh -B'
-    timeout: 30
-
   # ===== Docker Cleanup =====
   - title: "Prune Dangling Images"
     icon: "&#129529;"
@@ -430,6 +337,51 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/ryze_booster_monitor_watch.py" "Ryze Booster Bug Monitor → Mailpit" "olivetin"'
     timeout: 300
 
+  - title: "Vault SPB Bug Monitor"
+    icon: "&#128274;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/vault_spb_monitor_watch.py" "Vault SPB Bug Monitor → Mailpit" "olivetin"'
+    timeout: 300
+
+  - title: "Reward Recon V2 Watch"
+    icon: "&#127942;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/process-rewardable-events && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/process-rewardable-events/reward_recon_v2_watch.py" "Reward Recon V2 Watch" "olivetin"'
+    timeout: 300
+
+  - title: "Reward Offer Monitor"
+    icon: "&#127873;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/process-rewardable-events && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/process-rewardable-events/reward_offer_monitor_watch.py" "Reward Offer Monitor → Mailpit" "olivetin"'
+    timeout: 300
+
+  - title: "Temporal Failed Workflows (prod)"
+    icon: "&#9200;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/temporal && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/temporal/list_failed_workflows_watch.py" "Temporal Failed Workflows (prod)" "olivetin"'
+    timeout: 300
+
+  - title: "Temporal Failed Workflows (booster-prod)"
+    icon: "&#9200;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/temporal && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/temporal/list_failed_workflows_watch.py --env-file .env_booster_prod --label booster-prod" "Temporal Failed Workflows (booster-prod)" "olivetin"'
+    timeout: 300
+
+  - title: "Temporal Workflow UserIds Sync (prod)"
+    icon: "&#128260;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/temporal && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python list_workflow_userids.py --env-file .env_prod" "Temporal Workflow UserIds Sync (prod)" "olivetin"'
+    timeout: 300
+
+  - title: "Temporal Workflow UserIds Sync (booster-prod)"
+    icon: "&#128260;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/temporal && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python list_workflow_userids.py --env-file .env_booster_prod" "Temporal Workflow UserIds Sync (booster-prod)" "olivetin"'
+    timeout: 300
+
+  - title: "Plaid Monitor (prod)"
+    icon: "&#127974;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/plaid_monitor && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/plaid_monitor/plaid_monitor_watch.py" "Plaid Monitor (prod) → Mailpit" "olivetin"'
+    timeout: 300
+
+  - title: "MoEngage Inform Monitor"
+    icon: "&#128276;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/moengage-monitor && DISPLAY=:98 /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/moengage-monitor/moengage_monitor_watch.py" "MoEngage Inform Monitor (Booster_US) → Mailpit" "olivetin"'
+    timeout: 300
+
   # ===== linux-router: temporary lift/restore of the Mac block rules =====
   - title: "Disable Mac Block"
     icon: "&#128683;"
@@ -462,14 +414,110 @@ dashboards:
         contents:
           - title: "Enable Idle Shutdown"
           - title: "Disable Idle Shutdown"
-          - title: "Extend Idle Shutdown"
           - title: "Shutdown System"
+          - title: "Screenshot to ntfy"
           - title: "Download Teams Video (yt-dlp)"
       - title: Router
         type: fieldset
         contents:
           - title: "Disable Mac Block"
           - title: "Enable Mac Block"
+
+  # ===== Email scraping, banking, family =====
+  - title: Email & Finance
+    contents:
+      - title: Email PDFs
+        type: fieldset
+        contents:
+          - title: "Fetch Email PDF"
+          - title: "Fetch Anjli Email PDF"
+      - title: Banking
+        type: fieldset
+        contents:
+          - title: "Fetch ICICI Transactions (Anjli)"
+          - title: "Fetch ICICI Transactions (Madhur)"
+          - title: "Sync Email Alerts to Firefly (Madhur)"
+          - title: "Sync Email Alerts to Firefly (Anjli)"
+          - title: "Sync Bank SMS to Firefly (Madhur)"
+      - title: Reports & Digests
+        type: fieldset
+        contents:
+          - title: "AWS Cost Digest"
+          - title: "Claude Code Usage Digest"
+          - title: "Firefly Financial Digest"
+          - title: "Loan Prepayment Digest"
+      - title: Calendar Sync
+        type: fieldset
+        contents:
+          - title: "Sync Call Log to Calendar"
+          - title: "Sync SMS to Calendar"
+      - title: Family
+        type: fieldset
+        contents:
+          - title: "Fetch Google Photos (Dad)"
+          - title: "Run Family Inbox Digest (Madhur)"
+          - title: "Run Family Inbox Digest (Anjli)"
+          - title: "Run Family Inbox Digest (Om)"
+      - title: Media
+        type: fieldset
+        contents:
+          - title: "Fetch DesiTorrents Trending"
+
+  # ===== Everything for the workstation itself =====
+  - title: Desktop & System
+    contents:
+      - title: Recording
+        type: fieldset
+        contents:
+          - title: "Start Recording"
+          - title: "Stop Recording"
+      - title: Display & Screenshots
+        type: fieldset
+        contents:
+          - title: "Fix Display Layout"
+          - title: "Set Wallpaper"
+          - title: "Take Screenshot"
+          - title: "Toggle Screenshot Frequency"
+          - title: "Check Screenshot Frequency"
+          - title: "Fetch Weather Data"
+          - title: "Generate Weather Graph"
+      - title: VNC
+        type: fieldset
+        contents:
+          - title: "Restart VNC (Real Display :0)"
+          - title: "Restart VNC (Virtual Display :98)"
+      - title: Power
+        type: fieldset
+        contents:
+          - title: "Shutdown System"
+          - title: "Enable Idle Shutdown"
+          - title: "Disable Idle Shutdown"
+          - title: "Check Idle Shutdown Status"
+      - title: Maintenance
+        type: fieldset
+        contents:
+          - title: "Test SSH Connection"
+          - title: "Full System Update"
+
+  # ===== BookStack wiki markdown sync =====
+  - title: BookStack
+    contents:
+      - title: Wiki Markdown Sync
+        type: fieldset
+        contents:
+          - title: "Pull BookStack Wiki (BookStack → Markdown)"
+          - title: "Push BookStack Wiki (Markdown → BookStack)"
+
+  # ===== Docker cleanup =====
+  - title: Docker
+    contents:
+      - title: Cleanup
+        type: fieldset
+        contents:
+          - title: "Prune Dangling Images"
+          - title: "Clean Docker Images"
+          - title: "Clean Docker System (Full)"
+          - title: "Remove Dockcheck Backups (>7 days)"
 
   # ===== Cron-style runs, both bulk and individual =====
   - title: Scheduled Jobs
@@ -498,124 +546,24 @@ dashboards:
           - title: "Clean Pacman Cache"
           - title: "Clean Docker Images"
 
-  # ===== Email scraping, banking, family =====
-  - title: Email & Finance
+  # ===== Work-related monitors =====
+  - title: Work
     contents:
-      - title: Email PDFs
+      - title: Monitors
         type: fieldset
         contents:
-          - title: "Fetch Email PDF"
-          - title: "Fetch Anjli Email PDF"
-      - title: Banking
-        type: fieldset
-        contents:
-          - title: "Fetch ICICI Transactions (Anjli)"
-          - title: "Fetch ICICI Transactions (Madhur)"
-          - title: "Sync Email Alerts to Firefly (Madhur)"
-          - title: "Sync Email Alerts to Firefly (Anjli)"
-          - title: "Sync Bank SMS to Firefly (Madhur)"
-      - title: Reports & Digests
-        type: fieldset
-        contents:
-          - title: "AWS Cost Digest"
-          - title: "Claude Code Usage Digest"
-          - title: "Firefly Financial Digest"
-          - title: "Loan Prepayment Digest"
           - title: "Jira Cluster Monitor"
           - title: "Ryze Booster Bug Monitor"
-      - title: Calendar Sync
+          - title: "Vault SPB Bug Monitor"
+          - title: "Reward Recon V2 Watch"
+          - title: "Reward Offer Monitor"
+          - title: "Temporal Failed Workflows (prod)"
+          - title: "Temporal Failed Workflows (booster-prod)"
+          - title: "Plaid Monitor (prod)"
+          - title: "MoEngage Inform Monitor"
+      - title: Sync Jobs
         type: fieldset
         contents:
-          - title: "Sync Call Log to Calendar"
-          - title: "Sync SMS to Calendar"
-      - title: Family
-        type: fieldset
-        contents:
-          - title: "Fetch Google Photos (Dad)"
-          - title: "Run Family Inbox Digest (Madhur)"
-          - title: "Run Family Inbox Digest (Anjli)"
-          - title: "Run Family Inbox Digest (Om)"
-      - title: Media
-        type: fieldset
-        contents:
-          - title: "Fetch DesiTorrents Trending"
-
-  # ===== Docker inspect / updates / cleanup =====
-  - title: Docker
-    contents:
-      - title: Inspect
-        type: fieldset
-        contents:
-          - title: "List All Containers"
-          - title: "View All Container Stats"
-      - title: Updates (dockcheck)
-        type: fieldset
-        contents:
-          - title: "Check for Docker Updates"
-          - title: "Update All Docker Containers"
-          - title: "List Dockcheck Backup Images"
-      - title: Cleanup
-        type: fieldset
-        contents:
-          - title: "Prune Dangling Images"
-          - title: "Clean Docker Images"
-          - title: "Clean Docker System (Full)"
-          - title: "Remove Dockcheck Backups (>7 days)"
-
-  # ===== Everything for the workstation itself =====
-  - title: Desktop & System
-    contents:
-      - title: Recording
-        type: fieldset
-        contents:
-          - title: "Start Recording"
-          - title: "Stop Recording"
-      - title: Display & Screenshots
-        type: fieldset
-        contents:
-          - title: "Fix Display Layout"
-          - title: "Set Wallpaper"
-          - title: "Take Screenshot"
-          - title: "Screenshot to ntfy"
-          - title: "Toggle Screenshot Frequency"
-          - title: "Check Screenshot Frequency"
-          - title: "Fetch Weather Data"
-          - title: "Generate Weather Graph"
-      - title: VNC
-        type: fieldset
-        contents:
-          - title: "Restart VNC (Real Display :0)"
-          - title: "Restart VNC (Virtual Display :98)"
-      - title: Power
-        type: fieldset
-        contents:
-          - title: "Shutdown System"
-          - title: "Enable Idle Shutdown"
-          - title: "Disable Idle Shutdown"
-          - title: "Extend Idle Shutdown"
-          - title: "Check Idle Shutdown Status"
-      - title: Maintenance
-        type: fieldset
-        contents:
-          - title: "Test SSH Connection"
-          - title: "Full System Update"
-
-  # ===== Teams / SharePoint downloader variants =====
-  - title: Teams Downloads
-    contents:
-      - title: Teams Video
-        type: fieldset
-        contents:
-          - title: "Download Teams Video"
-          - title: "Download Teams Video (Prefect)"
-          - title: "Download Teams Video (yt-dlp)"
-
-  # ===== BookStack wiki markdown sync =====
-  - title: BookStack
-    contents:
-      - title: Wiki Markdown Sync
-        type: fieldset
-        contents:
-          - title: "Pull BookStack Wiki (BookStack → Markdown)"
-          - title: "Push BookStack Wiki (Markdown → BookStack)"
+          - title: "Temporal Workflow UserIds Sync (prod)"
+          - title: "Temporal Workflow UserIds Sync (booster-prod)"
 

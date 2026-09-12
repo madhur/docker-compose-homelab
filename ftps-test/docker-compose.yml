@@ -1,0 +1,22 @@
+# Throwaway local FTPS server used only to test/demo the rclone -> SFTPGo
+# bridge. No Traefik/Authelia — not meant to be reachable off this host.
+services:
+  ftps-test:
+    image: stilliard/pure-ftpd:hardened
+    container_name: ftps-test
+    network_mode: host
+    environment:
+      - PUBLICHOST=127.0.0.1
+      - FTP_USER_NAME=testuser
+      - FTP_USER_PASS=NV3lhHlcw5F1dc5zWv9F
+      - FTP_USER_HOME=/home/testuser
+      - FTP_USER_UID=1000
+      - FTP_USER_GID=1000
+      - FTP_PASSIVE_PORTS=30000:30009
+      - ADDED_FLAGS=--tls=2 --bind=127.0.0.1,21
+      - TLS_CN=127.0.0.1
+      - TLS_ORG=Homelab
+      - TLS_C=IN
+    volumes:
+      - ./data:/home/testuser
+    restart: unless-stopped

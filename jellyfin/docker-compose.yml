@@ -27,20 +27,19 @@ services:
       - "traefik.docker.network=proxy-network"
       - "traefik.http.services.jellyfin.loadbalancer.server.port=8096"
 
-      # LAN/VPN router: no auth (higher priority)
-      - "traefik.http.routers.jellyfin-local.rule=Host(`jf.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
-      - "traefik.http.routers.jellyfin-local.entrypoints=websecure"
-      - "traefik.http.routers.jellyfin-local.tls.certresolver=letencrypt"
-      - "traefik.http.routers.jellyfin-local.service=jellyfin"
-      - "traefik.http.routers.jellyfin-local.priority=10"
-
-      # Internet router: Authentik auth (lower priority, catches everything else)
+      # WAN router: no ForwardAuth (removed 2026-09-10, confirmed working).
+      # Jellyfin's own SSO-Auth plugin (OIDC via Authelia, client "jellyfin"
+      # in authelia/config/configuration.yml, provider key "sso-auth") gates
+      # browser logins via the SSO button; native apps (mobile/TV/Kodi) use
+      # normal Jellyfin credentials. ForwardAuth was dropped because it
+      # double-gated Jellyfin's own bootstrap/API calls (e.g.
+      # /System/Info/Public, /System/Info), causing endless-loading-spinner
+      # races and blocking native app logins entirely. Do not re-add
+      # ForwardAuth here without expecting that same breakage.
       - "traefik.http.routers.jellyfin.rule=Host(`jf.desktop.madhur.co.in`)"
       - "traefik.http.routers.jellyfin.entrypoints=websecure"
       - "traefik.http.routers.jellyfin.tls.certresolver=letencrypt"
-      - "traefik.http.routers.jellyfin.middlewares=authelia@file"
       - "traefik.http.routers.jellyfin.service=jellyfin"
-      - "traefik.http.routers.jellyfin.priority=1"
 
 networks:
   proxy-network:

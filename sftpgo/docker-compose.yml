@@ -12,6 +12,8 @@ services:
     ports:
       - "2022:2022"
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - proxy-network
     labels:
