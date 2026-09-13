@@ -182,6 +182,11 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/desitorrents_login.py" "Fetch DesiTorrents Trending" "olivetin"'
     timeout: 600
 
+  - title: "LinkedIn Notifications & Messages Digest"
+    icon: "&#128100;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/linkedin_reader && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python linkedin_reader.py" "LinkedIn Notifications & Messages Digest" "olivetin"'
+    timeout: 600
+
   - title: "Run Family Inbox Digest (Madhur)"
     icon: "&#128238;"
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/family_inbox && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/family_inbox/scrape_inbox.py -a Madhur" "Run Family Inbox Digest (Madhur)" "olivetin"'
@@ -327,6 +332,11 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "/home/madhur/scripts/loan_prepayment_digest.py" "Loan Prepayment Digest" "olivetin"'
     timeout: 300
 
+  - title: "Google Storage Weekly Digest"
+    icon: "&#128190;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/Desktop/python/google_storage_monitor && DISPLAY=:98 /home/madhur/.virtualenvs/python-rsha/bin/python storage_digest.py" "Google Storage Weekly Digest" "olivetin"'
+    timeout: 600
+
   - title: "Jira Cluster Monitor"
     icon: "&#128203;"
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/problem-tickets-updates && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/problem-tickets-updates/jira_cluster_monitor_watch.py" "Jira Cluster Monitor → Mailpit" "olivetin"'
@@ -446,6 +456,7 @@ dashboards:
           - title: "Claude Code Usage Digest"
           - title: "Firefly Financial Digest"
           - title: "Loan Prepayment Digest"
+          - title: "Google Storage Weekly Digest"
       - title: Calendar Sync
         type: fieldset
         contents:
@@ -462,6 +473,10 @@ dashboards:
         type: fieldset
         contents:
           - title: "Fetch DesiTorrents Trending"
+      - title: Social
+        type: fieldset
+        contents:
+          - title: "LinkedIn Notifications & Messages Digest"
 
   # ===== Everything for the workstation itself =====
   - title: Desktop & System
