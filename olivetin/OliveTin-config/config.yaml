@@ -85,6 +85,12 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '/home/madhur/scripts/check-screenshot-frequency.sh'
     timeout: 30
 
+  # ===== Image OCR =====
+  - title: "OCR Desktop Images"
+    icon: "&#128270;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in '[ -f ~/.ntfy_config ] && source ~/.ntfy_config; DISPLAY=:0 XAUTHORITY=$HOME/.Xauthority /home/madhur/.virtualenvs/python-rsha/bin/python /home/madhur/Desktop/python/desktop_image_ocr.py'
+    timeout: 300
+
   # ===== Cron Job Scripts (Run on-demand) =====
   - title: "Run 3-Hourly Tasks"
     icon: "&#128340;"
@@ -492,6 +498,7 @@ dashboards:
           - title: "Fix Display Layout"
           - title: "Set Wallpaper"
           - title: "Take Screenshot"
+          - title: "OCR Desktop Images"
           - title: "Toggle Screenshot Frequency"
           - title: "Check Screenshot Frequency"
           - title: "Fetch Weather Data"
