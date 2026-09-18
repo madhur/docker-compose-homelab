@@ -1,0 +1,35 @@
+services:
+  tududi:
+    image: chrisvel/tududi:latest
+    container_name: tududi
+    env_file:
+      - .env
+    volumes:
+      - ./tududi_db:/app/db
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.tududi.loadbalancer.server.port=3002"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.tududi-local.rule=Host(`tududi.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.tududi-local.entrypoints=websecure"
+      - "traefik.http.routers.tududi-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.tududi-local.service=tududi"
+      - "traefik.http.routers.tududi-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.tududi.rule=Host(`tududi.desktop.madhur.co.in`)"
+      - "traefik.http.routers.tududi.entrypoints=websecure"
+      - "traefik.http.routers.tududi.tls.certresolver=letencrypt"
+      - "traefik.http.routers.tududi.middlewares=authelia@file"
+      - "traefik.http.routers.tududi.service=tududi"
+      - "traefik.http.routers.tududi.priority=1"
+
+networks:
+  proxy-network:
+    external: true

@@ -401,6 +401,22 @@ identity_providers:
         # (DisablePushedAuthorization=true in SSO-Auth.xml) so only the
         # token exchange's client_secret_post applies. (fixed 2026-09-10)
         token_endpoint_auth_method: 'client_secret_post'
+      - client_id: 'tududi'
+        client_name: 'Tududi'
+        client_secret: '$pbkdf2-sha512$310000$pnWu4lmpPLfTKZT4r7aa2w$awHb61j0q3lik9fG6yu1fc2WuwmIENgffvv1d2u1ehrazkhYcUlAjRAqtjSgzOzALF6OL/BjD.MVSrxM1rgAsQ'
+        claims_policy: 'default'
+        public: false
+        authorization_policy: 'internal_bypass'
+        require_pkce: false
+        redirect_uris:
+          - 'https://tududi.desktop.madhur.co.in/api/oidc/callback/authelia'
+        scopes:
+          - 'openid'
+          - 'profile'
+          - 'email'
+          - 'groups'
+        userinfo_signed_response_alg: 'none'
+        token_endpoint_auth_method: 'client_secret_basic'
 
 session:
   redis:

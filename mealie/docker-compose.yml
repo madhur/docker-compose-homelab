@@ -1,0 +1,38 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    environment:
+      - TZ=Asia/Kolkata
+      - PUID=1000
+      - PGID=1001
+      - BASE_URL=https://mealie.desktop.madhur.co.in
+      - ALLOW_SIGNUP=false
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.mealie.loadbalancer.server.port=9000"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.mealie-local.rule=Host(`mealie.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.mealie-local.entrypoints=websecure"
+      - "traefik.http.routers.mealie-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mealie-local.service=mealie"
+      - "traefik.http.routers.mealie-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.mealie.rule=Host(`mealie.desktop.madhur.co.in`)"
+      - "traefik.http.routers.mealie.entrypoints=websecure"
+      - "traefik.http.routers.mealie.tls.certresolver=letencrypt"
+      - "traefik.http.routers.mealie.middlewares=authelia@file"
+      - "traefik.http.routers.mealie.service=mealie"
+      - "traefik.http.routers.mealie.priority=1"
+
+networks:
+  proxy-network:
+    external: true
