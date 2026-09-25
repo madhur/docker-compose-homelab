@@ -13,7 +13,7 @@ services:
       - FTP_USER_UID=1000
       - FTP_USER_GID=1000
       - FTP_PASSIVE_PORTS=30000:30009
-      - ADDED_FLAGS=--tls=2 --bind=127.0.0.1,21
+      - ADDED_FLAGS=--tls=2 --bind=0.0.0.0,21
       - TLS_CN=127.0.0.1
       - TLS_ORG=Homelab
       - TLS_C=IN

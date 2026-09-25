@@ -1,6 +1,6 @@
 services:
   invoiceshelf:
-    image: invoiceshelf/invoiceshelf:nightly
+    image: invoiceshelf/invoiceshelf:latest
     container_name: invoiceshelf
     restart: unless-stopped
     environment:

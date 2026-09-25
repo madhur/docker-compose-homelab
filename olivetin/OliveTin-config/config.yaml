@@ -398,6 +398,11 @@ actions:
     shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/moengage-monitor && DISPLAY=:98 /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/moengage-monitor/moengage_monitor_watch.py" "MoEngage Inform Monitor (Booster_US) → Mailpit" "olivetin"'
     timeout: 300
 
+  - title: "Transaction Decline Analysis (tenant 600024)"
+    icon: "&#128179;"
+    shell: ssh -F /config/ssh/easy.cfg madhur@local.madhur.co.in 'source /home/madhur/scripts/notify_wrapper.sh && run_with_notification "cd /home/madhur/github/python-scripts/transaction_decline_analysis && /home/madhur/.virtualenvs/python-scripts-yxaz/bin/python /home/madhur/github/python-scripts/transaction_decline_analysis/decline_analysis_watch.py .env_600024" "Transaction Decline Analysis (tenant 600024) → Mailpit" "olivetin"'
+    timeout: 300
+
   # ===== linux-router: temporary lift/restore of the Mac block rules =====
   - title: "Disable Mac Block"
     icon: "&#128683;"
@@ -583,6 +588,7 @@ dashboards:
           - title: "Temporal Failed Workflows (booster-prod)"
           - title: "Plaid Monitor (prod)"
           - title: "MoEngage Inform Monitor"
+          - title: "Transaction Decline Analysis (tenant 600024)"
       - title: Sync Jobs
         type: fieldset
         contents:

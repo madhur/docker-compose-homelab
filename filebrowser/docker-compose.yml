@@ -1,0 +1,35 @@
+services:
+  filebrowser:
+    image: gtstef/filebrowser:stable
+    container_name: filebrowser
+    environment:
+      - TZ=Asia/Kolkata
+    volumes:
+      - /home/madhur:/folder
+      - ./data:/home/filebrowser/data
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.filebrowser.loadbalancer.server.port=80"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.filebrowser-local.rule=Host(`filebrowser.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.filebrowser-local.entrypoints=websecure"
+      - "traefik.http.routers.filebrowser-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.filebrowser-local.service=filebrowser"
+      - "traefik.http.routers.filebrowser-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.filebrowser.rule=Host(`filebrowser.desktop.madhur.co.in`)"
+      - "traefik.http.routers.filebrowser.entrypoints=websecure"
+      - "traefik.http.routers.filebrowser.tls.certresolver=letencrypt"
+      - "traefik.http.routers.filebrowser.middlewares=authelia@file"
+      - "traefik.http.routers.filebrowser.service=filebrowser"
+      - "traefik.http.routers.filebrowser.priority=1"
+
+networks:
+  proxy-network:
+    external: true

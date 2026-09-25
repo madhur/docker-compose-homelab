@@ -1,0 +1,39 @@
+services:
+  rclone-manager:
+    image: ghcr.io/zarestia-dev/rclone-manager:latest
+    container_name: rclone-manager
+    environment:
+      - TZ=Asia/Kolkata
+      - PUID=1000
+      - PGID=1001
+    volumes:
+      - ./data:/data # app data & auto-downloaded rclone binary
+      - /home/madhur/.config/rclone:/config # host rclone.conf (shared with rclone on this machine)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - proxy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy-network"
+      - "traefik.http.services.rclone-manager.loadbalancer.server.port=8080"
+
+      # LAN/VPN router: no auth (higher priority)
+      - "traefik.http.routers.rclone-manager-local.rule=Host(`rclone-manager.desktop.madhur.co.in`) && (ClientIP(`192.168.1.0/24`) || ClientIP(`10.42.42.0/24`) || ClientIP(`172.22.0.0/16`))"
+      - "traefik.http.routers.rclone-manager-local.entrypoints=websecure"
+      - "traefik.http.routers.rclone-manager-local.tls.certresolver=letencrypt"
+      - "traefik.http.routers.rclone-manager-local.service=rclone-manager"
+      - "traefik.http.routers.rclone-manager-local.priority=10"
+
+      # Internet router: Authelia forward-auth (lower priority)
+      - "traefik.http.routers.rclone-manager.rule=Host(`rclone-manager.desktop.madhur.co.in`)"
+      - "traefik.http.routers.rclone-manager.entrypoints=websecure"
+      - "traefik.http.routers.rclone-manager.tls.certresolver=letencrypt"
+      - "traefik.http.routers.rclone-manager.middlewares=authelia@file"
+      - "traefik.http.routers.rclone-manager.service=rclone-manager"
+      - "traefik.http.routers.rclone-manager.priority=1"
+
+networks:
+  proxy-network:
+    external: true
